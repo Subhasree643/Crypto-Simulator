@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CryptAnalytica</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#07080f;--s1:#0e1020;--s2:#131628;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#dde3f0;--dim:#a0aec0;--faint:#6b7a99;
+  --card-bg:rgba(14,16,32,0.75);--card-head:rgba(0,0,0,0.2);
+  --input-bg:rgba(0,0,0,0.4);--ctrl-bg:rgba(0,0,0,0.25);
+  --v:#7059ff;--vb:#9b8dff;--p:#ff4f9b;--pb:#ff80b8;
+  --c:#00c9e0;--cb:#4ddff0;--g:#00d68f;--gb:#40e8b0;--y:#ffba00;
+  --gv:rgba(112,89,255,0.35);--gp:rgba(255,79,155,0.35);--gc:rgba(0,201,224,0.35);
+}
+body.light{
+  --bg:#f0f2f8;--s1:#e4e8f4;--s2:#dde2f0;
+  --border:rgba(0,0,0,0.1);--border2:rgba(0,0,0,0.18);
+  --text:#1a1f36;--dim:#374060;--faint:#5a6380;
+  --card-bg:rgba(255,255,255,0.85);--card-head:rgba(240,242,248,0.9);
+  --input-bg:rgba(255,255,255,0.9);--ctrl-bg:rgba(240,242,248,0.8);
+  --vb:#5b47e0;--pb:#e0287a;--cb:#008fa8;--gb:#007a52;
+  --gv:rgba(91,71,224,0.2);--gp:rgba(224,40,122,0.2);--gc:rgba(0,143,168,0.2);
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background 0.35s,color 0.35s;}
+#bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+#bg::before{content:'';position:absolute;width:800px;height:800px;background:radial-gradient(circle,rgba(112,89,255,0.22) 0%,transparent 65%);top:-300px;left:-200px;animation:orb1 18s ease-in-out infinite alternate;}
+#bg::after{content:'';position:absolute;width:650px;height:650px;background:radial-gradient(circle,rgba(255,79,155,0.18) 0%,transparent 65%);bottom:-200px;right:-150px;animation:orb2 14s ease-in-out infinite alternate;}
+.orb3{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(0,201,224,0.13) 0%,transparent 65%);top:40%;left:55%;transform:translate(-50%,-50%);animation:orb3 20s ease-in-out infinite alternate;}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;background-image:linear-gradient(rgba(112,89,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(112,89,255,0.04) 1px,transparent 1px);background-size:52px 52px;}
+@keyframes orb1{0%{transform:translate(0,0)}100%{transform:translate(100px,70px)}}
+@keyframes orb2{0%{transform:translate(0,0)}100%{transform:translate(-80px,-60px)}}
+@keyframes orb3{0%{transform:translate(-50%,-50%) scale(1)}100%{transform:translate(-46%,-54%) scale(1.2)}}
+.app{position:relative;z-index:10;min-height:100vh;display:flex;flex-direction:column;}
+header{display:flex;align-items:center;justify-content:space-between;padding:24px 28px 20px;flex-wrap:wrap;gap:14px;border-bottom:1px solid var(--border);background:rgba(7,8,15,0.7);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:13px;}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--v),var(--p));border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.25rem;box-shadow:0 0 22px var(--gv);animation:gpulse 3s ease-in-out infinite;}
+@keyframes gpulse{0%,100%{box-shadow:0 0 22px var(--gv);}50%{box-shadow:0 0 42px var(--gp),0 0 65px var(--gv);}}
+.logo-name{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:0.08em;background:linear-gradient(90deg,var(--vb),var(--pb),var(--cb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.logo-sub{font-family:'DM Mono',monospace;font-size:0.7rem;color:#8899bb;letter-spacing:0.18em;margin-top:2px;font-weight:500;}
+.tabs{display:flex;gap:4px;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:40px;padding:4px;backdrop-filter:blur(10px);}
+.tpill{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:0.06em;text-transform:uppercase;padding:7px 22px;border-radius:40px;border:none;cursor:pointer;background:transparent;color:var(--dim);transition:all 0.3s;}
+.tpill:hover{color:var(--text);}
+.tpill.des.on{background:linear-gradient(135deg,var(--p),var(--v));color:#fff;box-shadow:0 0 16px var(--gp);}
+.tpill.aes.on{background:linear-gradient(135deg,var(--c),var(--v));color:#fff;box-shadow:0 0 16px var(--gc);}
+.tcontent{display:none;}
+.tcontent.on{display:flex;flex-direction:column;}
+.grid{display:grid;grid-template-columns:310px 1fr;gap:15px;padding:18px 28px 28px;flex:1;}
+@media(max-width:860px){.grid{grid-template-columns:1fr;}}
+.lcol{display:flex;flex-direction:column;gap:13px;}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:15px;backdrop-filter:blur(22px);overflow:hidden;transition:border-color 0.3s,background 0.35s;}
+.card:hover{border-color:var(--border2);}
+.card-h{display:flex;align-items:center;gap:8px;padding:11px 16px;border-bottom:1px solid var(--border);background:var(--card-head);}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.dot-p{background:var(--p);box-shadow:0 0 6px var(--p);}
+.dot-c{background:var(--c);box-shadow:0 0 6px var(--c);}
+.dot-g{background:var(--g);box-shadow:0 0 6px var(--g);}
+.dot-v{background:var(--v);box-shadow:0 0 6px var(--v);}
+.card-t{font-family:'DM Sans',sans-serif;font-weight:800;font-size:0.72rem;letter-spacing:0.16em;text-transform:uppercase;color:var(--text);flex:1;}
+.card-b{padding:16px;}
+.brow{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:13px;}
+.badge{font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:600;padding:3px 8px;border-radius:40px;background:rgba(255,255,255,0.04);border:1px solid var(--border);color:var(--dim);}
+.badge b{color:var(--text);}
+.mode-sw{display:flex;background:var(--input-bg);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:11px;}
+.msw{flex:1;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.72rem;letter-spacing:0.05em;padding:8px;border:none;background:transparent;color:var(--faint);cursor:pointer;transition:all 0.25s;}
+.msw.enc-on{background:linear-gradient(135deg,rgba(255,79,155,0.3),rgba(112,89,255,0.3));color:var(--pb);}
+.msw.dec-on{background:linear-gradient(135deg,rgba(0,201,224,0.3),rgba(112,89,255,0.3));color:var(--cb);}
+.fld{margin-bottom:10px;}
+.fld label{display:block;font-family:'DM Mono',monospace;font-size:0.68rem;font-weight:700;color:var(--dim);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:4px;}
+.fld input,.fld select{width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.78rem;padding:8px 11px;outline:none;transition:all 0.25s;letter-spacing:0.04em;}
+.fld input:focus,.fld select:focus{border-color:var(--vb);box-shadow:0 0 0 3px rgba(112,89,255,0.18);}
+.fld select{appearance:none;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7a99'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:28px;}
+.brow2{display:flex;gap:8px;margin-top:5px;}
+.btn{flex:1;font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;padding:9px;border-radius:7px;border:none;cursor:pointer;transition:all 0.25s;}
+.btn-des{background:linear-gradient(135deg,var(--p),var(--v));color:#fff;box-shadow:0 4px 14px var(--gp);}
+.btn-des:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gp);}
+.btn-aes{background:linear-gradient(135deg,var(--c),var(--v));color:#fff;box-shadow:0 4px 14px var(--gc);}
+.btn-aes:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gc);}
+.btn-reset{background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--dim);}
+.btn-reset:hover{background:rgba(255,255,255,0.08);color:var(--text);}
+.obox{background:rgba(0,0,0,0.45);border:1px solid var(--border);border-radius:7px;padding:8px 11px;font-family:'DM Mono',monospace;font-size:0.71rem;min-height:32px;word-break:break-all;line-height:1.6;letter-spacing:0.04em;color:var(--dim);}
+.obox.pink{color:#ff8ec0;border-color:rgba(255,79,155,0.25);}
+.obox.cyan{color:#60eeff;border-color:rgba(0,201,224,0.25);}
+.obox.green{color:#50e8a8;border-color:rgba(0,214,143,0.25);}
+.mi-tag{font-family:'DM Mono',monospace;font-size:0.56rem;padding:3px 8px;border-radius:40px;border:1px solid;letter-spacing:0.12em;text-transform:uppercase;}
+.mi-e{color:var(--pb);border-color:rgba(255,79,155,0.3);background:rgba(255,79,155,0.08);}
+.mi-d{color:var(--cb);border-color:rgba(0,201,224,0.3);background:rgba(0,201,224,0.08);}
+.steps-panel{display:flex;flex-direction:column;max-height:88vh;}
+.sctrl{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:10px 15px;border-bottom:1px solid var(--border);background:var(--ctrl-bg);}
+.snav{font-family:'DM Mono',monospace;font-size:0.7rem;font-weight:600;padding:5px 13px;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:6px;color:var(--dim);cursor:pointer;transition:all 0.2s;}
+.snav:hover:not(:disabled){border-color:var(--border2);color:var(--text);}
+.snav:disabled{opacity:0.25;cursor:not-allowed;}
+.sauto{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.62rem;letter-spacing:0.1em;text-transform:uppercase;padding:5px 13px;background:transparent;border:1px solid var(--g);border-radius:6px;color:var(--g);cursor:pointer;transition:all 0.2s;}
+.sauto:hover{background:rgba(0,214,143,0.1);}
+.sauto.play{background:rgba(0,214,143,0.1);animation:gblink 1.3s infinite;}
+@keyframes gblink{0%,100%{border-color:var(--g);}50%{border-color:transparent;}}
+.sctr{margin-left:auto;font-family:'DM Mono',monospace;font-size:0.66rem;font-weight:700;color:var(--dim);}
+.pbar{height:2px;background:rgba(255,255,255,0.05);}
+.pfill{height:100%;transition:width 0.35s;border-radius:1px;}
+.pfill.des{background:linear-gradient(90deg,var(--p),var(--v));}
+.pfill.aes{background:linear-gradient(90deg,var(--c),var(--v));}
+.sscroll{overflow-y:auto;padding:13px;flex:1;}
+.sscroll::-webkit-scrollbar{width:3px;}
+.sscroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+.sc{border:1px solid rgba(255,255,255,0.05);border-radius:11px;margin-bottom:8px;overflow:hidden;background:rgba(0,0,0,0.22);opacity:0.32;transition:all 0.3s;}
+.sc.vis{opacity:0.72;}
+.sc.act{opacity:1;border-color:rgba(255,255,255,0.1);}
+.sc.act.ds{border-left:2px solid var(--p);box-shadow:-3px 0 14px rgba(255,79,155,0.18);}
+.sc.act.as{border-left:2px solid var(--c);box-shadow:-3px 0 14px rgba(0,201,224,0.18);}
+.sc-h{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.04);background:rgba(0,0,0,0.2);}
+.sn{font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;color:var(--faint);min-width:20px;}
+.act .sn{color:var(--p);}
+.act.as .sn{color:var(--c);}
+.sname{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.78rem;color:var(--dim);flex:1;}
+.act .sname{color:var(--text);}
+.rp{display:inline-block;font-family:'DM Mono',monospace;font-size:0.52rem;font-weight:700;padding:1px 5px;border-radius:40px;margin-right:4px;vertical-align:middle;}
+.rp-d{background:rgba(255,79,155,0.1);color:var(--pb);border:1px solid rgba(255,79,155,0.2);}
+.rp-a{background:rgba(0,201,224,0.1);color:var(--cb);border:1px solid rgba(0,201,224,0.2);}
+.tag{font-family:'DM Mono',monospace;font-size:0.52rem;font-weight:700;padding:2px 6px;border-radius:4px;letter-spacing:0.1em;text-transform:uppercase;border:1px solid;}
+.t-perm{background:rgba(0,214,143,0.08);color:#50e8a8;border-color:rgba(0,214,143,0.2);}
+.t-sub{background:rgba(0,201,224,0.08);color:var(--cb);border-color:rgba(0,201,224,0.2);}
+.t-xor{background:rgba(255,79,155,0.08);color:var(--pb);border-color:rgba(255,79,155,0.2);}
+.t-mix{background:rgba(255,186,0,0.08);color:#ffd060;border-color:rgba(255,186,0,0.2);}
+.t-key{background:rgba(155,141,255,0.08);color:var(--vb);border-color:rgba(155,141,255,0.2);}
+.t-shift{background:rgba(64,232,176,0.08);color:#40e8b0;border-color:rgba(64,232,176,0.2);}
+.t-init{background:rgba(255,255,255,0.04);color:var(--dim);border-color:var(--border);}
+.sc-b{padding:11px 12px;}
+.sdesc{font-family:'DM Sans',sans-serif;font-size:0.82rem;font-weight:500;color:var(--dim);line-height:1.6;margin-bottom:9px;}
+.db{background:rgba(0,0,0,0.4);border-radius:7px;padding:8px 11px;margin-bottom:6px;font-family:'DM Mono',monospace;font-size:0.67rem;letter-spacing:0.04em;border:1px solid rgba(255,255,255,0.05);}
+.dl{font-size:0.6rem;font-weight:700;text-transform:uppercase;letter-spacing:0.15em;color:var(--dim);margin-bottom:3px;}
+.dv{color:#a5b4fc;word-break:break-all;line-height:1.55;}
+.dv.fl{animation:vfl 0.55s ease;}
+@keyframes vfl{0%{color:#ffba00;}100%{color:#a5b4fc;}}
+.dv.s2{color:rgba(165,180,252,0.5);}
+/* AES Matrix */
+.amat{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:7px;}
+.amc{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:5px;padding:5px 2px;text-align:center;font-family:'DM Mono',monospace;font-size:0.65rem;color:#a5b4fc;font-weight:500;}
+/* Placeholder */
+.ph{text-align:center;padding:50px 20px;}
+.ph-ico{font-size:2.6rem;display:block;opacity:0.18;margin-bottom:11px;animation:spin 14s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ph-t{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;letter-spacing:0.1em;color:var(--faint);}
+.ph-s{font-family:'DM Mono',monospace;font-size:0.63rem;color:var(--faint);margin-top:4px;opacity:0.6;}
+
+/* ====== VISUAL TABLE STYLES ====== */
+.viz-section{margin-top:10px;}
+.viz-label{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.6rem;letter-spacing:0.18em;text-transform:uppercase;color:var(--y);margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.viz-label::before{content:'';display:inline-block;width:3px;height:10px;background:var(--y);border-radius:2px;}
+
+/* Perm table: shows bit N goes to position M */
+.perm-grid{display:grid;gap:2px;margin-bottom:8px;}
+.perm-row{display:flex;gap:2px;align-items:center;}
+.perm-cell{font-family:'DM Mono',monospace;font-size:0.58rem;width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgba(255,255,255,0.07);color:var(--dim);background:rgba(0,0,0,0.3);}
+.perm-cell.from{background:rgba(112,89,255,0.15);border-color:rgba(112,89,255,0.3);color:var(--vb);}
+.perm-cell.to{background:rgba(0,214,143,0.12);border-color:rgba(0,214,143,0.25);color:var(--gb);}
+.perm-cell.bit1{background:rgba(255,79,155,0.15);border-color:rgba(255,79,155,0.3);color:var(--pb);}
+.perm-cell.bit0{background:rgba(0,0,0,0.35);border-color:rgba(255,255,255,0.05);color:var(--faint);}
+.perm-arrow{font-size:0.7rem;color:var(--y);margin:0 3px;flex-shrink:0;}
+
+/* Bit mapping strip: each position shows from→to */
+.bit-map{display:flex;flex-wrap:wrap;gap:2px;margin-bottom:6px;}
+.bm-item{display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.05);border-radius:4px;padding:3px 4px;min-width:30px;}
+.bm-from{font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--vb);font-weight:600;}
+.bm-arr{font-size:0.5rem;color:var(--faint);}
+.bm-to{font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--gb);}
+.bm-val{font-family:'DM Mono',monospace;font-size:0.55rem;font-weight:700;margin-top:2px;}
+.bm-val.v1{color:var(--pb);}
+.bm-val.v0{color:var(--faint);}
+
+/* S-box table display */
+.sbox-wrap{overflow-x:auto;margin-bottom:8px;}
+.sbox-tbl{border-collapse:collapse;font-family:'DM Mono',monospace;font-size:0.58rem;}
+.sbox-tbl th{background:rgba(112,89,255,0.15);color:var(--vb);padding:4px 6px;border:1px solid rgba(255,255,255,0.06);text-align:center;font-weight:600;}
+.sbox-tbl td{padding:3px 6px;border:1px solid rgba(255,255,255,0.04);text-align:center;color:var(--dim);}
+.sbox-tbl td.hit{background:rgba(255,79,155,0.25);color:var(--pb);border-color:rgba(255,79,155,0.4);font-weight:700;}
+.sbox-tbl tr:hover td{background:rgba(255,255,255,0.03);}
+
+/* XOR visual */
+.xor-vis{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;font-family:'DM Mono',monospace;font-size:0.63rem;}
+.xor-row{display:flex;gap:0;flex-wrap:wrap;}
+.xor-bit{width:20px;height:20px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,0.05);font-size:0.6rem;}
+.xor-bit.b1{background:rgba(255,79,155,0.2);color:var(--pb);}
+.xor-bit.b0{background:rgba(0,0,0,0.3);color:var(--faint);}
+.xor-bit.xr1{background:rgba(0,214,143,0.2);color:var(--gb);}
+.xor-bit.xr0{background:rgba(0,0,0,0.25);color:var(--faint);}
+.xor-divider{display:flex;align-items:center;gap:6px;color:var(--y);font-size:0.6rem;padding:2px 0;}
+.xor-lbl{font-family:'DM Sans',sans-serif;font-size:0.6rem;color:var(--faint);width:28px;flex-shrink:0;}
+
+/* Feistel diagram */
+.feistel-vis{display:grid;grid-template-columns:1fr auto 1fr;gap:6px;align-items:center;margin-bottom:8px;font-family:'DM Mono',monospace;}
+.fv-block{background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.07);border-radius:7px;padding:8px;text-align:center;}
+.fv-lbl{font-family:'DM Sans',sans-serif;font-size:0.58rem;color:var(--faint);margin-bottom:3px;letter-spacing:0.1em;}
+.fv-val{font-size:0.6rem;word-break:break-all;line-height:1.5;}
+.fv-arrow{font-size:1.1rem;color:var(--y);text-align:center;}
+.fv-op{font-family:'DM Sans',sans-serif;font-size:0.62rem;color:var(--dim);text-align:center;margin-top:2px;}
+
+/* Shift-rows visual */
+.sr-vis{font-family:'DM Mono',monospace;font-size:0.62rem;margin-bottom:8px;}
+.sr-row{display:flex;align-items:center;gap:4px;margin-bottom:3px;}
+.sr-lbl{color:var(--faint);font-size:0.55rem;width:36px;flex-shrink:0;}
+.sr-cell{width:32px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:4px;border:1px solid rgba(255,255,255,0.07);font-size:0.6rem;}
+.sr-cell.shifted{background:rgba(0,201,224,0.15);border-color:rgba(0,201,224,0.3);color:var(--cb);}
+.sr-cell.plain{background:rgba(0,0,0,0.3);color:var(--dim);}
+.sr-arrow-lbl{color:var(--y);font-size:0.58rem;margin-left:6px;}
+
+/* MixColumns visual */
+.mc-vis{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:8px;}
+.mc-col{background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:5px 3px;text-align:center;}
+.mc-col-lbl{font-family:'DM Mono',monospace;font-size:0.5rem;color:var(--y);margin-bottom:3px;}
+.mc-byte{font-family:'DM Mono',monospace;font-size:0.6rem;color:var(--dim);padding:2px 0;}
+.mc-byte.out{color:var(--gb);font-weight:600;}
+
+/* Key schedule strip */
+.ks-vis{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:8px;}
+.ks-byte{font-family:'DM Mono',monospace;font-size:0.58rem;padding:3px 5px;border-radius:4px;background:rgba(155,141,255,0.1);border:1px solid rgba(155,141,255,0.2);color:var(--vb);}
+.ks-byte.sel{background:rgba(255,79,155,0.2);border-color:rgba(255,79,155,0.4);color:var(--pb);}
+
+/* ── THEME TOGGLE ── */
+.theme-btn{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.7rem;
+  letter-spacing:0.06em;text-transform:uppercase;
+  padding:7px 16px;border-radius:7px;
+  background:rgba(255,255,255,0.06);border:1px solid var(--border2);
+  color:var(--dim);cursor:pointer;transition:all 0.25s;
+  display:flex;align-items:center;gap:6px;
+}
+.theme-btn:hover{background:rgba(255,255,255,0.12);color:var(--text);}
+body.light .theme-btn{background:rgba(0,0,0,0.06);border-color:rgba(0,0,0,0.15);color:var(--dim);}
+body.light .theme-btn:hover{background:rgba(0,0,0,0.1);color:var(--text);}
+body.light #bg{display:none;}
+body.light .grid-bg{opacity:0.3;}
+body.light .card{box-shadow:0 2px 16px rgba(0,0,0,0.08);}
+body.light .sc{background:rgba(255,255,255,0.7);border-color:rgba(0,0,0,0.08);}
+body.light .sc.act{border-color:rgba(0,0,0,0.15);}
+body.light .db{background:rgba(240,242,248,0.9);border-color:rgba(0,0,0,0.08);}
+body.light .dv{color:#3730a3;}
+body.light .obox{background:rgba(255,255,255,0.9);}
+body.light .obox.pink{color:#be185d;border-color:rgba(190,24,93,0.3);}
+body.light .obox.cyan{color:#0369a1;border-color:rgba(3,105,161,0.3);}
+body.light .obox.green{color:#065f46;border-color:rgba(6,95,70,0.3);}
+body.light header{background:rgba(240,242,248,0.92);}
+body.light .pause-box{background:rgba(255,255,255,0.98);border-color:rgba(0,0,0,0.12);}
+body.light .pause-title{color:var(--text);}
+body.light .pause-step{color:var(--faint);}
+body.light .guide-box{background:rgba(255,255,255,0.98);border-color:rgba(0,0,0,0.12);}
+body.light .guide-sub{color:var(--faint);}
+body.light .gstep-text{color:var(--dim);}
+body.light .gtip{background:rgba(112,89,255,0.06);border-color:rgba(112,89,255,0.15);}
+body.light .sc-h{background:rgba(240,242,248,0.8);}
+body.light .speed-sel{background:rgba(255,255,255,0.9);color:var(--text);}
+body.light .jump-inp{background:rgba(255,255,255,0.9);color:var(--text);}
+
+.speed-row{display:flex;align-items:center;gap:8px;margin-left:4px;}
+.speed-lbl{font-family:'DM Mono',monospace;font-size:0.62rem;font-weight:700;color:var(--dim);white-space:nowrap;}
+.speed-sel{font-family:'DM Mono',monospace;font-size:0.65rem;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:3px 6px;outline:none;cursor:pointer;}
+
+/* ── FLOATING PAUSE BUTTON (always visible on screen) ── */
+#float-pause{
+  display:none;
+  position:fixed;
+  bottom:22px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:490;
+  background:linear-gradient(135deg,rgba(255,186,0,0.95),rgba(255,140,0,0.95));
+  color:#000;
+  font-family:'DM Sans',sans-serif;
+  font-weight:800;
+  font-size:0.9rem;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  padding:14px 36px;
+  border-radius:50px;
+  border:none;
+  cursor:pointer;
+  box-shadow:0 6px 30px rgba(255,186,0,0.5),0 2px 8px rgba(0,0,0,0.4);
+  animation:floatpulse 1.4s ease-in-out infinite;
+  white-space:nowrap;
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+}
+#float-pause.show{display:block;}
+@keyframes floatpulse{
+  0%,100%{box-shadow:0 6px 30px rgba(255,186,0,0.5),0 2px 8px rgba(0,0,0,0.4);transform:translateX(-50%) scale(1);}
+  50%{box-shadow:0 8px 40px rgba(255,186,0,0.75),0 2px 12px rgba(0,0,0,0.4);transform:translateX(-50%) scale(1.04);}
+}
+
+/* ── PAUSE OVERLAY ── */
+#pause-overlay{
+  display:none;position:fixed;inset:0;z-index:500;
+  background:rgba(7,8,15,0.82);backdrop-filter:blur(8px);
+  align-items:center;justify-content:center;flex-direction:column;gap:20px;
+}
+#pause-overlay.show{display:flex;}
+.pause-box{
+  background:rgba(14,16,32,0.95);border:1px solid var(--border2);
+  border-radius:20px;padding:36px 48px;text-align:center;
+  box-shadow:0 0 60px rgba(112,89,255,0.2);
+  max-width:380px;width:90%;
+}
+.pause-icon{font-size:3rem;margin-bottom:10px;}
+.pause-title{font-family:'Bebas Neue',sans-serif;font-size:1.8rem;letter-spacing:0.1em;color:var(--text);margin-bottom:6px;}
+.pause-step{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--dim);margin-bottom:24px;}
+.pause-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.pbtn{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.06em;text-transform:uppercase;padding:10px 22px;border-radius:8px;border:none;cursor:pointer;transition:all 0.2s;}
+.pbtn-res{background:linear-gradient(135deg,var(--g),var(--c));color:#000;}
+.pbtn-res:hover{transform:translateY(-1px);box-shadow:0 6px 18px var(--gc);}
+.pbtn-stop{background:rgba(255,79,155,0.15);border:1px solid rgba(255,79,155,0.3);color:var(--pb);}
+.pbtn-stop:hover{background:rgba(255,79,155,0.25);}
+.pbtn-skip{background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--dim);}
+.pbtn-skip:hover{background:rgba(255,255,255,0.1);color:var(--text);}
+
+/* ── GUIDE MODAL ── */
+#guide-modal{
+  display:none;position:fixed;inset:0;z-index:600;
+  background:rgba(7,8,15,0.88);backdrop-filter:blur(10px);
+  align-items:flex-start;justify-content:center;
+  overflow-y:auto;padding:30px 16px;
+}
+#guide-modal.show{display:flex;}
+.guide-box{
+  background:rgba(14,16,32,0.98);border:1px solid var(--border2);
+  border-radius:20px;padding:32px;max-width:680px;width:100%;
+  box-shadow:0 0 80px rgba(112,89,255,0.15);
+  position:relative;
+}
+.guide-close{
+  position:absolute;top:16px;right:16px;
+  background:rgba(255,255,255,0.06);border:1px solid var(--border);
+  border-radius:7px;color:var(--dim);font-size:1rem;
+  padding:4px 10px;cursor:pointer;transition:all 0.2s;
+}
+.guide-close:hover{background:rgba(255,79,155,0.15);color:var(--pb);border-color:var(--p);}
+.guide-title{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:0.08em;background:linear-gradient(90deg,var(--vb),var(--pb),var(--cb));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:4px;}
+.guide-sub{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--faint);letter-spacing:0.1em;margin-bottom:24px;}
+.guide-section{margin-bottom:22px;}
+.gsec-title{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.75rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--y);margin-bottom:10px;display:flex;align-items:center;gap:7px;}
+.gsec-title::before{content:'';display:inline-block;width:3px;height:12px;background:var(--y);border-radius:2px;}
+.gstep{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;}
+.gstep-num{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;width:24px;flex-shrink:0;line-height:1;}
+.gstep-num.des{color:var(--p);}
+.gstep-num.aes{color:var(--c);}
+.gstep-text{font-family:'DM Sans',sans-serif;font-size:0.82rem;color:var(--dim);line-height:1.55;}
+.gstep-text b{color:var(--text);}
+.gstep-text code{font-family:'DM Mono',monospace;font-size:0.75rem;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:4px;padding:1px 6px;color:var(--gb);}
+.gtip{background:rgba(112,89,255,0.1);border:1px solid rgba(112,89,255,0.2);border-radius:8px;padding:10px 14px;font-family:'DM Sans',sans-serif;font-size:0.8rem;color:var(--dim);margin-bottom:8px;}
+.gtip b{color:var(--vb);}
+.gtip code{font-family:'DM Mono',monospace;font-size:0.73rem;color:var(--gb);}
+.gdivider{height:1px;background:var(--border);margin:18px 0;}
+.guide-btn{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.75rem;
+  letter-spacing:0.06em;text-transform:uppercase;
+  padding:10px 28px;border-radius:8px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--v),var(--p));color:#fff;
+  box-shadow:0 4px 14px var(--gp);transition:all 0.25s;
+}
+.guide-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px var(--gp);}
+
+/* ── HELP BUTTON in header ── */
+.help-btn{
+  font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.7rem;
+  letter-spacing:0.06em;text-transform:uppercase;
+  padding:7px 16px;border-radius:7px;
+  background:rgba(255,186,0,0.12);border:1px solid rgba(255,186,0,0.3);
+  color:var(--y);cursor:pointer;transition:all 0.2s;
+  display:flex;align-items:center;gap:5px;
+}
+.help-btn:hover{background:rgba(255,186,0,0.2);box-shadow:0 0 12px rgba(255,186,0,0.2);}
+
+/* ── COPY BUTTON ── */
+.copy-btn{
+  font-family:'DM Mono',monospace;font-size:0.58rem;
+  padding:2px 8px;border-radius:4px;border:1px solid var(--border);
+  background:rgba(255,255,255,0.04);color:var(--faint);cursor:pointer;
+  transition:all 0.2s;margin-left:6px;vertical-align:middle;
+}
+.copy-btn:hover{background:rgba(0,214,143,0.1);color:var(--gb);border-color:rgba(0,214,143,0.3);}
+.copy-btn.copied{color:var(--gb);border-color:rgba(0,214,143,0.4);background:rgba(0,214,143,0.1);}
+
+/* ── JUMP INPUT ── */
+.jump-wrap{display:flex;align-items:center;gap:4px;}
+.jump-inp{font-family:'DM Mono',monospace;font-size:0.65rem;width:44px;background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:5px;color:var(--text);padding:4px 6px;outline:none;text-align:center;}
+.jump-inp:focus{border-color:var(--vb);}
+.jump-go{font-family:'DM Sans',sans-serif;font-weight:700;font-size:0.6rem;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:rgba(255,255,255,0.05);color:var(--dim);cursor:pointer;}
+.jump-go:hover{background:rgba(112,89,255,0.15);color:var(--vb);border-color:rgba(112,89,255,0.3);}
+</style>
+</head>
+<body>
+<div id="bg"><div class="orb3"></div></div>
+<div class="grid-bg"></div>
+<div class="app">
+<header>
+  <div class="logo">
+    <div class="logo-icon">&#x1F512;</div>
+    <div>
+      <div class="logo-name">CryptAnalytica</div>
+      <div class="logo-sub">Visual Cryptography Engine &nbsp;||&nbsp; DES &amp; AES &nbsp;||&nbsp; Encrypt &amp; Decrypt</div>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <button class="theme-btn" id="theme-btn" onclick="toggleTheme()">&#x2600; Light Mode</button>
+    <button class="help-btn" onclick="openGuide()">&#x2753; How to Use</button>
+    <div class="tabs">
+      <button class="tpill des on" onclick="switchTab('des')">DES Cipher</button>
+      <button class="tpill aes" onclick="switchTab('aes')">AES Cipher</button>
+    </div>
+  </div>
+</header>
+
+<!-- DES TAB -->
+<div id="des-tab" class="tcontent on">
+<div class="grid">
+  <div class="lcol">
+    <div class="card">
+      <div class="card-h"><div class="dot dot-p"></div><div class="card-t">DES Configuration</div></div>
+      <div class="card-b">
+        <div class="brow"><div class="badge">Block <b>64-bit</b></div><div class="badge">Key <b>56-bit</b></div><div class="badge">Rounds <b>16</b></div><div class="badge">Feistel</div></div>
+        <div class="mode-sw" id="dm-sw">
+          <button class="msw enc-on" onclick="setDM('enc')">&#x1F512; Encrypt</button>
+          <button class="msw" onclick="setDM('dec')">&#x1F513; Decrypt</button>
+        </div>
+        <div class="fld"><label id="d-il">Plaintext &mdash; 64-bit (8 chars)</label><input type="text" id="d-in" value="HELLO123" maxlength="8"></div>
+        <div class="fld"><label>Key &mdash; 64-bit (8 chars)</label><input type="text" id="d-key" value="SECRETKY" maxlength="8"></div>
+        <div class="brow2">
+          <button class="btn btn-des" onclick="runDES()">&#x25B6; Simulate</button>
+          <button class="btn btn-reset" onclick="resetDES()">&#x21BA;</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="dot dot-g"></div><div class="card-t">Output</div><span class="mi-tag mi-e" id="d-mi">ENCRYPT</span></div>
+      <div class="card-b">
+        <div class="fld"><label>Input Hex</label><div class="obox pink" id="d-ih">&#8212;</div></div>
+        <div class="fld"><label>Output Hex <button class="copy-btn" onclick="copyOut('d-oh',this)">&#x2398; Copy</button></label><div class="obox green" id="d-oh">&#8212;</div></div>
+        <div class="fld"><label>Binary / ASCII</label><div class="obox" id="d-ob" style="font-size:0.58rem;color:var(--faint)">&#8212;</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card steps-panel">
+    <div class="card-h"><div class="dot dot-p"></div><div class="card-t">Internal Steps &mdash; DES</div></div>
+    <div id="dc-ctrl" class="sctrl" style="display:none">
+      <button class="snav" id="d-prev" onclick="dNav(-1)">&#9664; Prev</button>
+      <button class="snav" id="d-next" onclick="dNav(1)">Next &#9654;</button>
+      <button class="sauto" id="d-auto" onclick="dAuto()">&#9654; AUTO</button>
+      <button class="snav" id="d-pause" onclick="dPause()" style="display:none;border-color:rgba(255,186,0,0.4);color:var(--y)">&#x23F8; Pause</button>
+      <div class="speed-row">
+        <span class="speed-lbl">Speed:</span>
+        <select class="speed-sel" id="d-speed">
+          <option value="2000">Slow</option>
+          <option value="1200" selected>Normal</option>
+          <option value="600">Fast</option>
+          <option value="200">Very Fast</option>
+        </select>
+      </div>
+      <div class="jump-wrap">
+        <input class="jump-inp" type="number" id="d-jump" min="1" placeholder="#">
+        <button class="jump-go" onclick="dJump()">Go</button>
+      </div>
+      <span class="sctr" id="d-ctr">0 / 0</span>
+    </div>
+    <div class="pbar" id="d-prog" style="display:none"><div class="pfill des" id="d-pf" style="width:0%"></div></div>
+    <div class="sscroll" id="d-steps">
+      <div class="ph"><span class="ph-ico">&#x2699;</span><div class="ph-t">Ready</div><div class="ph-s">Enter values and click Simulate</div></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- AES TAB -->
+<div id="aes-tab" class="tcontent">
+<div class="grid">
+  <div class="lcol">
+    <div class="card">
+      <div class="card-h"><div class="dot dot-c"></div><div class="card-t">AES Configuration</div></div>
+      <div class="card-b">
+        <div class="brow"><div class="badge">Block <b>128-bit</b></div><div class="badge">SPN</div><div class="badge">FIPS 197</div></div>
+        <div class="mode-sw" id="am-sw">
+          <button class="msw enc-on" onclick="setAM('enc')">&#x1F512; Encrypt</button>
+          <button class="msw" onclick="setAM('dec')">&#x1F513; Decrypt</button>
+        </div>
+        <div class="fld"><label id="a-il">Plaintext &mdash; 128-bit(16 ASCII chars)</label><input type="text" id="a-in" value="HelloWorldCrypto" maxlength="16"></div>
+        <div class="fld"><label>Key Size</label>
+          <select id="a-ks" onchange="updAK()">
+            <option value="128">AES-128 &mdash; 128 bits (16 chars)</option>
+            <option value="192">AES-192 &mdash; 192 bits (24 chars)</option>
+            <option value="256">AES-256 &mdash; 256 bits (32 chars)</option>
+          </select>
+        </div>
+        <div class="fld"><label id="a-kl">Key &mdash; 128 bit (16 chars)</label><input type="text" id="a-key" value="SecretKey1234567" maxlength="16"></div>
+        <div class="brow2">
+          <button class="btn btn-aes" onclick="runAES()">&#x25B6; Simulate</button>
+          <button class="btn btn-reset" onclick="resetAES()">&#x21BA;</button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-h"><div class="dot dot-g"></div><div class="card-t">Output</div><span class="mi-tag mi-e" id="a-mi">ENCRYPT</span></div>
+      <div class="card-b">
+        <div class="fld"><label>Input Hex</label><div class="obox cyan" id="a-ih">&#8212;</div></div>
+        <div class="fld"><label>Output Hex <button class="copy-btn" onclick="copyOut('a-oh',this)">&#x2398; Copy</button></label><div class="obox green" id="a-oh">&#8212;</div></div>
+        <div class="fld"><label>State Matrix / ASCII</label><div id="a-mat">&#8212;</div></div>
+      </div>
+    </div>
+  </div>
+  <div class="card steps-panel">
+    <div class="card-h"><div class="dot dot-c"></div><div class="card-t">Internal Steps &mdash; AES</div></div>
+    <div id="ac-ctrl" class="sctrl" style="display:none">
+      <button class="snav" id="a-prev" onclick="aNav(-1)">&#9664; Prev</button>
+      <button class="snav" id="a-next" onclick="aNav(1)">Next &#9654;</button>
+      <button class="sauto" id="a-auto" onclick="aAuto()">&#9654; AUTO</button>
+      <button class="snav" id="a-pause" onclick="aPause()" style="display:none;border-color:rgba(255,186,0,0.4);color:var(--y)">&#x23F8; Pause</button>
+      <div class="speed-row">
+        <span class="speed-lbl">Speed:</span>
+        <select class="speed-sel" id="a-speed">
+          <option value="2000">Slow</option>
+          <option value="1200" selected>Normal</option>
+          <option value="600">Fast</option>
+          <option value="200">Very Fast</option>
+        </select>
+      </div>
+      <div class="jump-wrap">
+        <input class="jump-inp" type="number" id="a-jump" min="1" placeholder="#">
+        <button class="jump-go" onclick="aJump()">Go</button>
+      </div>
+      <span class="sctr" id="a-ctr">0 / 0</span>
+    </div>
+    <div class="pbar" id="a-prog" style="display:none"><div class="pfill aes" id="a-pf" style="width:0%"></div></div>
+    <div class="sscroll" id="a-steps">
+      <div class="ph"><span class="ph-ico">&#x2699;</span><div class="ph-t">Ready</div><div class="ph-s">// Enter values and click Simulate</div></div>
+    </div>
+  </div>
+</div>
+</div>
+</div>
+
+<script>
+var g=function(id){return document.getElementById(id);};
+function toHex(s){return Array.from(s).map(function(c){return c.charCodeAt(0).toString(16).padStart(2,'0');}).join('').toUpperCase();}
+function hexSp(h){return (h.match(/.{1,2}/g)||[]).join(' ');}
+function binToHex(b){var h='';for(var i=0;i<b.length;i+=4)h+=parseInt(b.substr(i,4),2).toString(16);return h.toUpperCase();}
+function hexToBin(h){return h.split('').map(function(c){return parseInt(c,16).toString(2).padStart(4,'0');}).join('');}
+function xorBin(a,b){return a.split('').map(function(x,i){return x===b[i]?'0':'1';}).join('');}
+function toBin64(s){return Array.from(s.padEnd(8,' ').substr(0,8)).map(function(c){return c.charCodeAt(0).toString(2).padStart(8,'0');}).join('');}
+function stHex(st){return st.map(function(b){return b.toString(16).padStart(2,'0');}).join('').toUpperCase();}
+function hexToBytes(hex){var b=[];for(var i=0;i<hex.length;i+=2)b.push(parseInt(hex.substr(i,2),16));return b;}
+
+/* ===== DES TABLES ===== */
+var IP=[58,50,42,34,26,18,10,2,60,52,44,36,28,20,12,4,62,54,46,38,30,22,14,6,64,56,48,40,32,24,16,8,57,49,41,33,25,17,9,1,59,51,43,35,27,19,11,3,61,53,45,37,29,21,13,5,63,55,47,39,31,23,15,7];
+var IP_INV=[40,8,48,16,56,24,64,32,39,7,47,15,55,23,63,31,38,6,46,14,54,22,62,30,37,5,45,13,53,21,61,29,36,4,44,12,52,20,60,28,35,3,43,11,51,19,59,27,34,2,42,10,50,18,58,26,33,1,41,9,49,17,57,25];
+var PC1=[57,49,41,33,25,17,9,1,58,50,42,34,26,18,10,2,59,51,43,35,27,19,11,3,60,52,44,36,63,55,47,39,31,23,15,7,62,54,46,38,30,22,14,6,61,53,45,37,29,21,13,5,28,20,12,4];
+var PC2=[14,17,11,24,1,5,3,28,15,6,21,10,23,19,12,4,26,8,16,7,27,20,13,2,41,52,31,37,47,55,30,40,51,45,33,48,44,49,39,56,34,53,46,42,50,36,29,32];
+var SHIFTS=[1,1,2,2,2,2,2,2,1,2,2,2,2,2,2,1];
+var E_TBL=[32,1,2,3,4,5,4,5,6,7,8,9,8,9,10,11,12,13,12,13,14,15,16,17,16,17,18,19,20,21,20,21,22,23,24,25,24,25,26,27,28,29,28,29,30,31,32,1];
+var P_TBL=[16,7,20,21,29,12,28,17,1,15,23,26,5,18,31,10,2,8,24,14,32,27,3,9,19,13,30,6,22,11,4,25];
+var SB=[
+  [[14,4,13,1,2,15,11,8,3,10,6,12,5,9,0,7],[0,15,7,4,14,2,13,1,10,6,12,11,9,5,3,8],[4,1,14,8,13,6,2,11,15,12,9,7,3,10,5,0],[15,12,8,2,4,9,1,7,5,11,3,14,10,0,6,13]],
+  [[15,1,8,14,6,11,3,4,9,7,2,13,12,0,5,10],[3,13,4,7,15,2,8,14,12,0,1,10,6,9,11,5],[0,14,7,11,10,4,13,1,5,8,12,6,9,3,2,15],[13,8,10,1,3,15,4,2,11,6,7,12,0,5,14,9]],
+  [[10,0,9,14,6,3,15,5,1,13,12,7,11,4,2,8],[13,7,0,9,3,4,6,10,2,8,5,14,12,11,15,1],[13,6,4,9,8,15,3,0,11,1,2,12,5,10,14,7],[1,10,13,0,6,9,8,7,4,15,14,3,11,5,2,12]],
+  [[7,13,14,3,0,6,9,10,1,2,8,5,11,12,4,15],[13,8,11,5,6,15,0,3,4,7,2,12,1,10,14,9],[10,6,9,0,12,11,7,13,15,1,3,14,5,2,8,4],[3,15,0,6,10,1,13,8,9,4,5,11,12,7,2,14]],
+  [[2,12,4,1,7,10,11,6,8,5,3,15,13,0,14,9],[14,11,2,12,4,7,13,1,5,0,15,10,3,9,8,6],[4,2,1,11,10,13,7,8,15,9,12,5,6,3,0,14],[11,8,12,7,1,14,2,13,6,15,0,9,10,4,5,3]],
+  [[12,1,10,15,9,2,6,8,0,13,3,4,14,7,5,11],[10,15,4,2,7,12,9,5,6,1,13,14,0,11,3,8],[9,14,15,5,2,8,12,3,7,0,4,10,1,13,11,6],[4,3,2,12,9,5,15,10,11,14,1,7,6,0,8,13]],
+  [[4,11,2,14,15,0,8,13,3,12,9,7,5,10,6,1],[13,0,11,7,4,9,1,10,14,3,5,12,2,15,8,6],[1,4,11,13,12,3,7,14,10,15,6,8,0,5,9,2],[6,11,13,8,1,4,10,7,9,5,0,15,14,2,3,12]],
+  [[13,2,8,4,6,15,11,1,10,9,3,14,5,0,12,7],[1,15,13,8,10,3,7,4,12,5,6,11,0,14,9,2],[7,11,4,1,9,12,14,2,0,6,10,13,15,3,5,8],[2,1,14,7,4,10,8,13,15,12,9,0,3,5,6,11]]
+];
+
+function perm(bits,tbl){return tbl.map(function(p){return bits[p-1];}).join('');}
+function desKS(kb){
+  var kp=perm(kb,PC1),C=kp.substr(0,28),D=kp.substr(28,28),sks=[];
+  for(var i=0;i<16;i++){C=C.substr(SHIFTS[i])+C.substr(0,SHIFTS[i]);D=D.substr(SHIFTS[i])+D.substr(0,SHIFTS[i]);sks.push(perm(C+D,PC2));}
+  return sks;
+}
+function fFunc(R,sk){
+  var ex=perm(R,E_TBL),xo=xorBin(ex,sk),so='';
+  for(var i=0;i<8;i++){var c=xo.substr(i*6,6),r=parseInt(c[0]+c[5],2),col=parseInt(c.substr(1,4),2);so+=SB[i][r][col].toString(2).padStart(4,'0');}
+  return perm(so,P_TBL);
+}
+
+/* ===== VISUAL TABLE BUILDERS ===== */
+
+/* Determine best cols given total bits — always 8 columns */
+function gridCols(total){ return 8; }
+
+/*
+  buildPermViz — renders the permutation as an NxM grid where N=cols=8, M=total/8
+  Each cell shows: src-pos on top, dest-pos below, bit value at bottom
+*/
+function buildPermViz(inBits, tbl, maxShow){
+  var total = tbl.length;
+  var cols = 8;
+  var rows = Math.ceil(total / cols);
+  var label = total+'  bits  →  '+cols+' × '+rows+' grid';
+  var html = '<div class="viz-section"><div class="viz-label">Bit Mapping Table &nbsp;('+label+')</div>';
+  html += '<div style="overflow-x:auto">';
+  html += '<table style="border-collapse:collapse;font-family:DM Mono,monospace;font-size:0.56rem;width:100%">';
+  // column headers
+  html += '<thead><tr><th style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);font-size:0.5rem">#</th>';
+  for(var c=0;c<cols;c++) html += '<th style="padding:3px 6px;color:var(--vb);border:1px solid rgba(255,255,255,0.06);background:rgba(112,89,255,0.12);min-width:42px">Col '+(c+1)+'</th>';
+  html += '</tr></thead><tbody>';
+  for(var r=0;r<rows;r++){
+    html += '<tr>';
+    html += '<td style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.3);font-size:0.5rem;text-align:center">R'+(r+1)+'</td>';
+    for(var c=0;c<cols;c++){
+      var idx = r*cols + c;
+      if(idx >= total){ html += '<td style="border:1px solid rgba(255,255,255,0.04)"></td>'; continue; }
+      var srcPos = tbl[idx];
+      var bit = inBits ? inBits[srcPos-1] : '?';
+      var isOne = bit === '1';
+      var bg = isOne ? 'rgba(255,79,155,0.18)' : 'rgba(0,0,0,0.3)';
+      var bitColor = isOne ? 'var(--pb)' : 'var(--faint)';
+      html += '<td style="border:1px solid rgba(255,255,255,0.06);background:'+bg+';padding:4px 3px;text-align:center;vertical-align:middle">';
+      html += '<div style="color:var(--vb);font-size:0.5rem;line-height:1.2">src b'+srcPos+'</div>';
+      html += '<div style="color:var(--y);font-size:0.48rem;line-height:1.2">&#8595; pos '+(idx+1)+'</div>';
+      html += '<div style="color:'+bitColor+';font-size:0.7rem;font-weight:700;line-height:1.3">'+bit+'</div>';
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  html += '<div class="db" style="margin-top:6px;font-size:0.58rem;color:var(--faint)">&#x24D8; Violet = source bit position &nbsp;|&nbsp; Yellow = destination position &nbsp;|&nbsp; Pink=1 / Grey=0</div>';
+  html += '</div>';
+  return html;
+}
+
+/* XOR visual — shown as 8-column rows */
+function buildXorViz(a, b, res, lblA, lblB, lblR){
+  var len = a.length; // 48 for E-box XOR
+  var cols = 8;
+  var rows = Math.ceil(len / cols);
+  function makeRow(bits, color, label){
+    var h = '<div style="display:flex;align-items:center;gap:4px;margin-bottom:3px">';
+    h += '<span style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--faint);width:32px;flex-shrink:0">'+label+'</span>';
+    h += '<div style="display:grid;grid-template-columns:repeat('+cols+',1fr);gap:2px;flex:1">';
+    for(var i=0;i<len;i++){
+      var isOne = bits[i]==='1';
+      var bg = isOne ? (color==='xr'?'rgba(0,214,143,0.2)':'rgba(255,79,155,0.18)') : 'rgba(0,0,0,0.3)';
+      var fc = isOne ? (color==='xr'?'var(--gb)':'var(--pb)') : 'var(--faint)';
+      h += '<div style="background:'+bg+';border:1px solid rgba(255,255,255,0.06);border-radius:3px;text-align:center;font-family:DM Mono,monospace;font-size:0.65rem;font-weight:700;color:'+fc+';padding:3px 0">'+bits[i]+'</div>';
+    }
+    h += '</div></div>';
+    return h;
+  }
+  var html = '<div class="viz-section"><div class="viz-label">Bit-by-Bit XOR &nbsp;('+len+' bits &rarr; '+cols+' &times; '+rows+' grid)</div>';
+  html += makeRow(a,'a',lblA);
+  html += '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--y);margin:3px 0 3px 36px">&#x2295; XOR</div>';
+  html += makeRow(b,'b',lblB);
+  html += '<div style="font-family:DM Mono,monospace;font-size:0.6rem;color:var(--y);margin:3px 0 3px 36px">= Result</div>';
+  html += makeRow(res,'xr',lblR);
+  html += '</div>';
+  return html;
+}
+
+/* S-box table for one S-box, highlighting the used cell */
+function buildSboxViz(xoredBits){
+  var html = '<div class="viz-section"><div class="viz-label">S-Box Substitution Detail (all 8 S-boxes)</div>';
+  for(var s=0;s<8;s++){
+    var chunk = xoredBits.substr(s*6, 6);
+    var row = parseInt(chunk[0]+chunk[5], 2);
+    var col = parseInt(chunk.substr(1,4), 2);
+    var outVal = SB[s][row][col];
+    var outBin = outVal.toString(2).padStart(4,'0');
+    html += '<div style="margin-bottom:10px">';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--y);margin-bottom:4px">S'+( s+1)+': input=<span style="color:var(--pb)">'+chunk+'</span> &rarr; row=<span style="color:var(--vb)">'+row+'</span> col=<span style="color:var(--vb)">'+col+'</span> &rarr; out=<span style="color:var(--gb)">'+outVal+' ('+outBin+')</span></div>';
+    html += '<div class="sbox-wrap"><table class="sbox-tbl"><thead><tr><th>Row\\Col</th>';
+    for(var c=0;c<16;c++) html += '<th>'+(c<10?c:'0123456789ABCDEF'[c])+'</th>';
+    html += '</tr></thead><tbody>';
+    for(var r=0;r<4;r++){
+      html += '<tr><th>'+r+'</th>';
+      for(var c=0;c<16;c++){
+        var isHit = (r===row && c===col);
+        html += '<td class="'+(isHit?'hit':'')+'">'+SB[s][r][c]+'</td>';
+      }
+      html += '</tr>';
+    }
+    html += '</tbody></table></div></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+/* P-box or E-box permutation detail — shown as 8-column grid */
+function buildBoxViz(inBits, outBits, tbl, name){
+  var total = tbl.length;
+  var cols = 8;
+  var rows = Math.ceil(total / cols);
+  var html = '<div class="viz-section"><div class="viz-label">'+name+' &nbsp;('+total+' bits &rarr; '+cols+' &times; '+rows+' grid)</div>';
+  html += '<div style="overflow-x:auto">';
+  html += '<table style="border-collapse:collapse;font-family:DM Mono,monospace;font-size:0.56rem;width:100%">';
+  html += '<thead><tr><th style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);font-size:0.5rem">#</th>';
+  for(var c=0;c<cols;c++) html += '<th style="padding:3px 6px;color:var(--vb);border:1px solid rgba(255,255,255,0.06);background:rgba(112,89,255,0.12);min-width:42px">Col '+(c+1)+'</th>';
+  html += '</tr></thead><tbody>';
+  for(var r=0;r<rows;r++){
+    html += '<tr>';
+    html += '<td style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.3);font-size:0.5rem;text-align:center">R'+(r+1)+'</td>';
+    for(var c=0;c<cols;c++){
+      var idx = r*cols+c;
+      if(idx>=total){html+='<td style="border:1px solid rgba(255,255,255,0.04)"></td>';continue;}
+      var src = tbl[idx];
+      var bit = inBits[src-1];
+      var isOne = bit==='1';
+      var bg = isOne?'rgba(0,214,143,0.14)':'rgba(0,0,0,0.3)';
+      var bitColor = isOne?'var(--gb)':'var(--faint)';
+      html += '<td style="border:1px solid rgba(255,255,255,0.06);background:'+bg+';padding:4px 3px;text-align:center;vertical-align:middle">';
+      html += '<div style="color:var(--vb);font-size:0.5rem;line-height:1.2">src b'+src+'</div>';
+      html += '<div style="color:var(--y);font-size:0.48rem;line-height:1.2">&#8595; out '+(idx+1)+'</div>';
+      html += '<div style="color:'+bitColor+';font-size:0.7rem;font-weight:700;line-height:1.3">'+bit+'</div>';
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  html += '<div class="db" style="margin-top:6px;font-size:0.58rem;color:var(--faint)">&#x24D8; Violet = source bit position &nbsp;|&nbsp; Yellow = output position &nbsp;|&nbsp; Green=1 / Grey=0</div>';
+  html += '</div>';
+  return html;
+}
+
+/* Feistel round visual */
+function buildFeistelViz(L, R, fOut, newL, newR, round){
+  var html = '<div class="viz-section"><div class="viz-label">Feistel Round '+round+' Diagram</div>';
+  html += '<div class="feistel-vis">';
+  html += '<div class="fv-block"><div class="fv-lbl">L'+( round-1)+' (input)</div><div class="fv-val" style="color:var(--vb)">'+L.substr(0,16)+'&hellip;</div></div>';
+  html += '<div style="text-align:center;font-size:1.5rem;color:var(--y)">&#8594;</div>';
+  html += '<div class="fv-block"><div class="fv-lbl">L'+round+' = R'+(round-1)+'</div><div class="fv-val" style="color:var(--gb)">'+newL.substr(0,16)+'&hellip;</div><div class="fv-op">passed through unchanged</div></div>';
+  html += '</div>';
+  html += '<div class="feistel-vis" style="margin-top:4px">';
+  html += '<div class="fv-block"><div class="fv-lbl">R'+(round-1)+' (input)</div><div class="fv-val" style="color:var(--cb)">'+R.substr(0,16)+'&hellip;</div></div>';
+  html += '<div style="text-align:center;font-size:0.7rem;color:var(--y)">F&oplus;L</div>';
+  html += '<div class="fv-block"><div class="fv-lbl">R'+round+' = L'+(round-1)+' &oplus; F(R,K)</div><div class="fv-val" style="color:var(--pb)">'+newR.substr(0,16)+'&hellip;</div><div class="fv-op">F output XORed with L</div></div>';
+  html += '</div>';
+  html += '<div class="db" style="margin-top:6px;font-size:0.6rem"><span style="color:var(--vb)">F(R,K)</span> = <span style="color:var(--gb)">'+fOut.substr(0,16)+'&hellip;</span></div>';
+  html += '</div>';
+  return html;
+}
+
+/* PC-1 / PC-2 key schedule viz — 8-column grid */
+function buildKeyViz(keyBits, subkey, tbl, name){
+  var total = tbl.length;
+  var cols = 8;
+  var rows = Math.ceil(total / cols);
+  var html = '<div class="viz-section"><div class="viz-label">'+name+' &nbsp;('+total+' bits selected &rarr; '+cols+' &times; '+rows+' grid)</div>';
+  html += '<div style="overflow-x:auto">';
+  html += '<table style="border-collapse:collapse;font-family:DM Mono,monospace;font-size:0.56rem;width:100%">';
+  html += '<thead><tr><th style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.06);background:rgba(0,0,0,0.3);font-size:0.5rem">#</th>';
+  for(var c=0;c<cols;c++) html += '<th style="padding:3px 6px;color:var(--vb);border:1px solid rgba(255,255,255,0.06);background:rgba(112,89,255,0.12);min-width:42px">Col '+(c+1)+'</th>';
+  html += '</tr></thead><tbody>';
+  for(var r=0;r<rows;r++){
+    html += '<tr>';
+    html += '<td style="padding:3px 4px;color:var(--faint);border:1px solid rgba(255,255,255,0.05);background:rgba(0,0,0,0.3);font-size:0.5rem;text-align:center">R'+(r+1)+'</td>';
+    for(var c=0;c<cols;c++){
+      var idx = r*cols+c;
+      if(idx>=total){html+='<td style="border:1px solid rgba(255,255,255,0.04)"></td>';continue;}
+      var src = tbl[idx];
+      var bit = keyBits[src-1];
+      var isOne = bit==='1';
+      var bg = isOne?'rgba(155,141,255,0.2)':'rgba(0,0,0,0.3)';
+      var bitColor = isOne?'var(--vb)':'var(--faint)';
+      html += '<td style="border:1px solid rgba(255,255,255,0.06);background:'+bg+';padding:4px 3px;text-align:center;vertical-align:middle">';
+      html += '<div style="color:var(--pb);font-size:0.5rem;line-height:1.2">key b'+src+'</div>';
+      html += '<div style="color:var(--y);font-size:0.48rem;line-height:1.2">&#8595; sk '+(idx+1)+'</div>';
+      html += '<div style="color:'+bitColor+';font-size:0.7rem;font-weight:700;line-height:1.3">'+bit+'</div>';
+      html += '</td>';
+    }
+    html += '</tr>';
+  }
+  html += '</tbody></table></div>';
+  html += '<div class="db" style="margin-top:6px;font-size:0.58rem;color:var(--faint)">&#x24D8; Pink = source key bit &nbsp;|&nbsp; Yellow = subkey position &nbsp;|&nbsp; Violet=1 / Grey=0</div>';
+  html += '</div>';
+  return html;
+}
+
+/* AES S-box visual for one round */
+function buildAesSboxViz(inState, outState){
+  var html = '<div class="viz-section"><div class="viz-label">SubBytes &mdash; S-Box Lookup (each byte)</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:6px">';
+  for(var i=0;i<16;i++){
+    var inB = inState[i], outB = outState[i];
+    html += '<div style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:5px;text-align:center">';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.52rem;color:var(--faint)">b'+(i+1)+'</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--vb)">0x'+inB.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    html += '<div style="font-size:0.55rem;color:var(--y)">&darr;</div>';
+    html += '<div style="font-family:DM Mono,monospace;font-size:0.58rem;color:var(--pb)">0x'+outB.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<div class="db" style="font-size:0.59rem;color:var(--faint)">&#x24D8; Violet = input byte &nbsp;|&nbsp; Pink = output after S-box lookup &nbsp;|&nbsp; S-box: GF(2&#x2078;) inverse + affine transform</div>';
+  html += '</div>';
+  return html;
+}
+
+/* AES ShiftRows visual */
+function buildShiftRowsViz(inState, outState, inverse){
+  var shifts = inverse ? [0,3,2,1] : [0,1,2,3];
+  var html = '<div class="viz-section"><div class="viz-label">'+(inverse?'InvShiftRows':'ShiftRows')+' &mdash; Row Shift Diagram</div>';
+  html += '<div class="sr-vis">';
+  for(var row=0;row<4;row++){
+    var sh = shifts[row];
+    html += '<div class="sr-row">';
+    html += '<div class="sr-lbl">Row '+row+'</div>';
+    // before
+    for(var col=0;col<4;col++){
+      var b = inState[col*4+row];
+      html += '<div class="sr-cell plain">'+b.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    }
+    html += '<span style="color:var(--y);margin:0 6px;font-size:0.7rem">&rarr;'+(sh>0?sh+(inverse?' right':' left'):'no shift')+'</span>';
+    // after
+    for(var col=0;col<4;col++){
+      var b2 = outState[col*4+row];
+      html += '<div class="sr-cell '+(sh>0?'shifted':'plain')+'">'+b2.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div></div>';
+  return html;
+}
+
+/* AES MixColumns visual */
+function buildMixColViz(inState, outState){
+  var html = '<div class="viz-section"><div class="viz-label">MixColumns &mdash; Column Transformation (GF(2&#x2078;))</div>';
+  html += '<div class="mc-vis">';
+  for(var col=0;col<4;col++){
+    html += '<div class="mc-col"><div class="mc-col-lbl">Col '+col+'</div>';
+    html += '<div style="font-size:0.5rem;color:var(--faint);margin-bottom:3px">in &rarr; out</div>';
+    for(var row=0;row<4;row++){
+      var inB = inState[col*4+row], outB = outState[col*4+row];
+      html += '<div style="display:flex;justify-content:space-between;padding:1px 2px">';
+      html += '<span class="mc-byte">'+inB.toString(16).padStart(2,'0').toUpperCase()+'</span>';
+      html += '<span style="color:var(--y);font-size:0.5rem">&rarr;</span>';
+      html += '<span class="mc-byte out">'+outB.toString(16).padStart(2,'0').toUpperCase()+'</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<div class="db" style="font-size:0.58rem;color:var(--faint)">Matrix: [2,3,1,1 | 1,2,3,1 | 1,1,2,3 | 3,1,1,2] &mdash; multiplication in GF(2&#x2078;) mod 0x11b</div>';
+  html += '</div>';
+  return html;
+}
+
+/* AES AddRoundKey XOR visual */
+function buildAesXorViz(inState, rk, outState){
+  var html = '<div class="viz-section"><div class="viz-label">AddRoundKey &mdash; State XOR Round Key</div>';
+  html += '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-bottom:5px">';
+  for(var i=0;i<16;i++){
+    var s=inState[i],k=rk[i],o=outState[i];
+    html += '<div style="background:rgba(0,0,0,0.35);border:1px solid rgba(255,255,255,0.06);border-radius:5px;padding:4px;text-align:center;font-family:DM Mono,monospace;">';
+    html += '<div style="font-size:0.5rem;color:var(--faint)">b'+(i+1)+'</div>';
+    html += '<div style="font-size:0.57rem;color:var(--cb)">'+s.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    html += '<div style="font-size:0.5rem;color:var(--y)">&oplus;</div>';
+    html += '<div style="font-size:0.57rem;color:var(--vb)">'+k.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    html += '<div style="font-size:0.5rem;color:var(--faint)">=</div>';
+    html += '<div style="font-size:0.57rem;color:var(--gb)">'+o.toString(16).padStart(2,'0').toUpperCase()+'</div>';
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<div class="db" style="font-size:0.58rem;color:var(--faint)">Cyan = state &nbsp;|&nbsp; Violet = round key &nbsp;|&nbsp; Green = result</div>';
+  html += '</div>';
+  return html;
+}
+
+/* ===== DES PROCESS ===== */
+function desProc(inBits,kBits,dec){
+  var steps=[],sks=desKS(kBits),ord=dec?sks.slice().reverse():sks;
+  var inLbl=dec?'Ciphertext':'Plaintext';
+  var kpc1=perm(kBits,PC1);
+
+  steps.push({n:'Input Block',tag:'init',r:null,
+    desc:'The 64-bit '+inLbl+' block is loaded. Each character is 8 bits (ASCII).',
+    d1:{l:inLbl+' (Binary)',v:inBits.match(/.{8}/g).join(' ')},
+    d2:{l:'Hex',v:binToHex(inBits)},
+    viz:''});
+
+  var ip=perm(inBits,IP);
+  steps.push({n:'Initial Permutation (IP)',tag:'perm',r:null,
+    desc:'All 64 bits rearranged by the IP table. Bit at position 58 moves to position 1, position 50 to position 2, etc. The table below shows exactly where each bit comes from and its value.',
+    d1:{l:'After IP (Binary)',v:ip.match(/.{8}/g).join(' ')},
+    d2:{l:'After IP (Hex)',v:binToHex(ip)},
+    viz:buildPermViz(inBits, IP, 64)});
+
+  var L=ip.substr(0,32),R=ip.substr(32,32);
+  steps.push({n:'Split: L\u2080 and R\u2080',tag:'mix',r:null,
+    desc:'The permuted 64-bit block splits into two 32-bit halves. L\u2080 = left 32 bits, R\u2080 = right 32 bits.',
+    d1:{l:'L\u2080 (bits 1-32)',v:L.match(/.{8}/g).join(' ')},
+    d2:{l:'R\u2080 (bits 33-64)',v:R.match(/.{8}/g).join(' ')},
+    viz:''});
+
+  steps.push({n:'Key PC-1 Permutation',tag:'key',r:null,
+    desc:'The 64-bit key passes through PC-1 which drops 8 parity bits and selects 56 bits in a specific order. The table shows which bit positions are selected.',
+    d1:{l:'Key after PC-1 (56-bit)',v:kpc1.match(/.{7}/g).join(' ')},
+    d2:{l:'Subkey order',v:dec?'K16\u2192K15\u2192\u2026\u2192K1 (reversed)':'K1\u2192K2\u2192\u2026\u2192K16'},
+    viz:buildKeyViz(kBits, kpc1, PC1, 'PC-1 (64\u219256 bits)')});
+
+  for(var i=0;i<16;i++){
+    var sk=ord[i],ki=dec?(16-i):i+1;
+    var prevL=L,prevR=R;
+
+    steps.push({n:'Round '+(i+1)+' \u2014 Key K'+ki,tag:'key',r:i+1,
+      desc:'PC-2 selects 48 of the 56 bits from the rotated C/D halves to form subkey K'+ki+'. The table shows which bit positions PC-2 picks.',
+      d1:{l:'Subkey K'+ki+' (48-bit)',v:sk.match(/.{6}/g).join(' ')},
+      d2:{l:'Rotation',v:SHIFTS[i]+' bit'+(SHIFTS[i]>1?'s':'')+' left'},
+      viz:buildKeyViz(kBits, sk.match(/.{6}/g).join(' '), PC2, 'PC-2 (56\u219248 bits)')});
+
+    var eR=perm(R,E_TBL);
+    steps.push({n:'Round '+(i+1)+' \u2014 E-box Expansion',tag:'perm',r:i+1,
+      desc:'R'+(i)+' (32 bits) expands to 48 bits. The E-box duplicates boundary bits so XOR with the 48-bit subkey is possible. The mapping table shows exactly which input bits map to which output positions.',
+      d1:{l:'Expanded R (48-bit)',v:eR.match(/.{6}/g).join(' ')},
+      d2:{l:'32 \u219248 bits',v:'Boundary bits duplicated at group edges'},
+      viz:buildBoxViz(R, eR, E_TBL, 'E-box Expansion (32\u219248 bits)')});
+
+    var xo=xorBin(eR,sk);
+    steps.push({n:'Round '+(i+1)+' \u2014 XOR with K'+ki,tag:'xor',r:i+1,
+      desc:'The 48-bit expanded R is XORed bit-by-bit with subkey K'+ki+'. Each bit is independently combined. The diagram below shows all 48 bits of both operands and the result.',
+      d1:{l:'After XOR (48-bit)',v:xo.match(/.{6}/g).join(' ')},
+      d2:{l:'XOR rule',v:'1\u22950=1 \u00B7 0\u22951=1 \u00B7 1\u22951=0 \u00B7 0\u22950=0'},
+      viz:buildXorViz(eR, sk, xo, 'E(R)', 'K'+ki, 'XOR')});
+
+    steps.push({n:'Round '+(i+1)+' \u2014 S-Box Substitution',tag:'sub',r:i+1,
+      desc:'The 48-bit XOR result splits into 8 groups of 6 bits. Each group enters one S-box: the outermost 2 bits select the row (0-3), the inner 4 bits select the column (0-15). The full S-box tables are shown below with the selected cell highlighted.',
+      d1:{l:'After S-Boxes (32-bit)',v:''},
+      d2:{l:'Effect',v:'8\u00D7(6-in \u2192 4-out) = Non-linearity'},
+      viz:buildSboxViz(xo),
+      sboxXo:xo});
+
+    var so='';
+    for(var s2=0;s2<8;s2++){var cc=xo.substr(s2*6,6),rr=parseInt(cc[0]+cc[5],2),col=parseInt(cc.substr(1,4),2);so+=SB[s2][rr][col].toString(2).padStart(4,'0');}
+    steps[steps.length-1].d1.v=so.match(/.{4}/g).join(' ');
+
+    var po=perm(so,P_TBL);
+    steps.push({n:'Round '+(i+1)+' \u2014 P-Box Permutation',tag:'perm',r:i+1,
+      desc:'The 32-bit S-box output is permuted by the P-box. Each output position receives a specific input bit, spreading the data across the block for diffusion.',
+      d1:{l:'After P-Box (32-bit)',v:po.match(/.{8}/g).join(' ')},
+      d2:{l:'Purpose',v:'Diffusion \u2014 one bit change propagates widely'},
+      viz:buildBoxViz(so, po, P_TBL, 'P-Box Permutation (32\u219232 bits)')});
+
+    var fOut=po;
+    var nR=xorBin(L,po),nL=R;
+    steps.push({n:'Round '+(i+1)+' \u2014 Feistel XOR & Swap',tag:'xor',r:i+1,
+      desc:'L'+(i+1)+'=R'+i+' (unchanged). R'+(i+1)+'=L'+i+' \u2295 F(R'+i+',K'+ki+'). The diagram shows the data flow.',
+      d1:{l:'L'+(i+1)+' | R'+(i+1),v:nL.substr(0,16)+'\u2026 | '+nR.substr(0,16)+'\u2026'},
+      d2:{l:'Feistel rule',v:'L'+(i+1)+'=R'+i+' \u00B7 R'+(i+1)+'=L'+i+'\u2295F(R'+i+',K'+ki+')'},
+      viz:buildFeistelViz(prevL,prevR,fOut,nL,nR,i+1)});
+    L=nL;R=nR;
+  }
+
+  var sw=R+L;
+  steps.push({n:'Final 32-bit Swap',tag:'mix',r:null,
+    desc:'After 16 rounds, R\u2081\u2086 and L\u2081\u2086 are swapped, making the algorithm self-inverse (decryption uses same structure, just reversed subkeys).',
+    d1:{l:'Swapped (Binary)',v:sw.match(/.{8}/g).join(' ')},
+    d2:{l:'Before swap',v:'L\u2081\u2086='+L.substr(0,16)+'\u2026 R\u2081\u2086='+R.substr(0,16)+'\u2026'},
+    viz:''});
+
+  var ct=perm(sw,IP_INV);
+  steps.push({n:'Final Permutation (IP\u207B\u00B9)',tag:'perm',r:null,
+    desc:'IP-inverse is applied to produce the final output. The table shows exactly which bit goes where.',
+    d1:{l:(dec?'Decrypted Plaintext':'Ciphertext')+' (Binary)',v:ct.match(/.{8}/g).join(' ')},
+    d2:{l:'Hex',v:binToHex(ct)},
+    viz:buildPermViz(sw, IP_INV, 64)});
+
+  return{steps:steps,out:ct};
+}
+
+/* ===== DES UI ===== */
+var dMode='enc',dSteps=[],dCur=0,dTimer=null;
+function setDM(m){
+  dMode=m;
+  var bs=g('dm-sw').querySelectorAll('.msw');
+  bs[0].className='msw'+(m==='enc'?' enc-on':'');
+  bs[1].className='msw'+(m==='dec'?' dec-on':'');
+  g('d-il').textContent=m==='enc'?'Plaintext \u2014 8 ASCII chars':'Ciphertext (Hex) \u2014 16 hex chars';
+  g('d-in').value=m==='enc'?'HELLO123':'';
+  g('d-in').maxLength=m==='enc'?8:16;
+  g('d-mi').textContent=m==='enc'?'ENCRYPT':'DECRYPT';
+  g('d-mi').className='mi-tag '+(m==='enc'?'mi-e':'mi-d');
+}
+function runDES(){
+  var key=g('d-key').value.padEnd(8,' ').substr(0,8);
+  var kB=toBin64(key),inBits;
+  if(dMode==='enc'){
+    var pt=g('d-in').value.padEnd(8,' ').substr(0,8);
+    inBits=toBin64(pt);
+    g('d-ih').textContent=hexSp(toHex(pt));
+  } else {
+    var hx=g('d-in').value.replace(/\s/g,'').toUpperCase();
+    if(hx.length<16){alert('Enter 16 hex chars for DES decryption.');return;}
+    hx=hx.substr(0,16);inBits=hexToBin(hx);
+    g('d-ih').textContent=hexSp(hx);
+  }
+  var res=desProc(inBits,kB,dMode==='dec');
+  dSteps=res.steps;dCur=0;
+  var oh=binToHex(res.out);
+  g('d-oh').textContent=hexSp(oh);
+  if(dMode==='dec'){
+    var txt=hexToBytes(oh).map(function(b){return b>=32&&b<127?String.fromCharCode(b):'?';}).join('');
+    g('d-ob').textContent='ASCII: '+txt;g('d-ob').style.color='#50e8a8';
+  } else {
+    g('d-ob').textContent=res.out.match(/.{8}/g).join(' ');g('d-ob').style.color='';
+  }
+  g('dc-ctrl').style.display='flex';g('d-prog').style.display='block';
+  renderD();
+}
+function renderD(){
+  var c=g('d-steps');c.innerHTML='';
+  dSteps.forEach(function(s,i){
+    var isA=i===dCur,isV=i<dCur;
+    var tc={perm:'t-perm',sub:'t-sub',xor:'t-xor',mix:'t-mix',key:'t-key',init:'t-init',shift:'t-shift'}[s.tag]||'t-init';
+    var rp=s.r?'<span class="rp rp-d">R'+s.r+'</span>':'';
+    var div=document.createElement('div');
+    div.className='sc ds '+(isA?'act ':'')+(isV?'vis ':'');
+    div.id='dc'+i;
+    var inner='<div class="sc-h"><span class="sn">'+String(i+1).padStart(2,'0')+'</span><span class="sname">'+rp+s.n+'</span><span class="tag '+tc+'">'+s.tag+'</span></div>';
+    if(isA||isV){
+      inner+='<div class="sc-b"><p class="sdesc">'+s.desc+'</p>';
+      inner+='<div class="db"><div class="dl">'+s.d1.l+'</div><div class="dv'+(isA?' fl':'')+'">'+s.d1.v+'</div></div>';
+      if(s.d2&&s.d2.v)inner+='<div class="db"><div class="dl">'+s.d2.l+'</div><div class="dv s2">'+s.d2.v+'</div></div>';
+      if(isA&&s.viz)inner+=s.viz;
+      inner+='</div>';
+    }
+    div.innerHTML=inner;
+    c.appendChild(div);
+  });
+  var pct=((dCur+1)/dSteps.length*100).toFixed(1);
+  g('d-pf').style.width=pct+'%';
+  g('d-ctr').textContent=(dCur+1)+' / '+dSteps.length;
+  g('d-prev').disabled=dCur===0;
+  g('d-next').disabled=dCur===dSteps.length-1;
+  setTimeout(function(){var el=g('dc'+dCur);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+}
+function dNav(d){dCur=Math.max(0,Math.min(dSteps.length-1,dCur+d));renderD();}
+function dAuto(){
+  var b=g('d-auto');
+  if(dTimer){clearInterval(dTimer);dTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');}
+  else{b.textContent='\u23F8 STOP';b.classList.add('play');
+    dTimer=setInterval(function(){
+      if(dCur>=dSteps.length-1){clearInterval(dTimer);dTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');return;}
+      dCur++;renderD();},1200);}
+}
+function resetDES(){
+  if(dTimer){clearInterval(dTimer);dTimer=null;}
+  dSteps=[];dCur=0;
+  ['d-ih','d-oh','d-ob'].forEach(function(id){g(id).textContent='\u2014';});
+  g('dc-ctrl').style.display='none';g('d-prog').style.display='none';
+  g('d-steps').innerHTML='<div class="ph"><span class="ph-ico">&#x2699;</span><div class="ph-t">Ready</div><div class="ph-s">// Enter values and click Simulate</div></div>';
+}
+
+/* ===== AES TABLES ===== */
+var SA=[0x63,0x7c,0x77,0x7b,0xf2,0x6b,0x6f,0xc5,0x30,0x01,0x67,0x2b,0xfe,0xd7,0xab,0x76,0xca,0x82,0xc9,0x7d,0xfa,0x59,0x47,0xf0,0xad,0xd4,0xa2,0xaf,0x9c,0xa4,0x72,0xc0,0xb7,0xfd,0x93,0x26,0x36,0x3f,0xf7,0xcc,0x34,0xa5,0xe5,0xf1,0x71,0xd8,0x31,0x15,0x04,0xc7,0x23,0xc3,0x18,0x96,0x05,0x9a,0x07,0x12,0x80,0xe2,0xeb,0x27,0xb2,0x75,0x09,0x83,0x2c,0x1a,0x1b,0x6e,0x5a,0xa0,0x52,0x3b,0xd6,0xb3,0x29,0xe3,0x2f,0x84,0x53,0xd1,0x00,0xed,0x20,0xfc,0xb1,0x5b,0x6a,0xcb,0xbe,0x39,0x4a,0x4c,0x58,0xcf,0xd0,0xef,0xaa,0xfb,0x43,0x4d,0x33,0x85,0x45,0xf9,0x02,0x7f,0x50,0x3c,0x9f,0xa8,0x51,0xa3,0x40,0x8f,0x92,0x9d,0x38,0xf5,0xbc,0xb6,0xda,0x21,0x10,0xff,0xf3,0xd2,0xcd,0x0c,0x13,0xec,0x5f,0x97,0x44,0x17,0xc4,0xa7,0x7e,0x3d,0x64,0x5d,0x19,0x73,0x60,0x81,0x4f,0xdc,0x22,0x2a,0x90,0x88,0x46,0xee,0xb8,0x14,0xde,0x5e,0x0b,0xdb,0xe0,0x32,0x3a,0x0a,0x49,0x06,0x24,0x5c,0xc2,0xd3,0xac,0x62,0x91,0x95,0xe4,0x79,0xe7,0xc8,0x37,0x6d,0x8d,0xd5,0x4e,0xa9,0x6c,0x56,0xf4,0xea,0x65,0x7a,0xae,0x08,0xba,0x78,0x25,0x2e,0x1c,0xa6,0xb4,0xc6,0xe8,0xdd,0x74,0x1f,0x4b,0xbd,0x8b,0x8a,0x70,0x3e,0xb5,0x66,0x48,0x03,0xf6,0x0e,0x61,0x35,0x57,0xb9,0x86,0xc1,0x1d,0x9e,0xe1,0xf8,0x98,0x11,0x69,0xd9,0x8e,0x94,0x9b,0x1e,0x87,0xe9,0xce,0x55,0x28,0xdf,0x8c,0xa1,0x89,0x0d,0xbf,0xe6,0x42,0x68,0x41,0x99,0x2d,0x0f,0xb0,0x54,0xbb,0x16];
+var SAI=new Array(256);SA.forEach(function(v,i){SAI[v]=i;});
+var RCON=[0x01,0x02,0x04,0x08,0x10,0x20,0x40,0x80,0x1b,0x36];
+function gmul(a,b){var p=0;for(var i=0;i<8;i++){if(b&1)p^=a;var h=a&0x80;a=(a<<1)&0xff;if(h)a^=0x1b;b>>=1;}return p;}
+function aSub(st){return st.map(function(b){return SA[b];});}
+function aISub(st){return st.map(function(b){return SAI[b];});}
+function aSR(st){var s=st.slice();s[1]=st[5];s[5]=st[9];s[9]=st[13];s[13]=st[1];s[2]=st[10];s[10]=st[2];s[6]=st[14];s[14]=st[6];s[3]=st[15];s[15]=st[11];s[11]=st[7];s[7]=st[3];return s;}
+function aISR(st){var s=st.slice();s[5]=st[1];s[9]=st[5];s[13]=st[9];s[1]=st[13];s[10]=st[2];s[2]=st[10];s[14]=st[6];s[6]=st[14];s[15]=st[3];s[11]=st[15];s[7]=st[11];s[3]=st[7];return s;}
+function aMC(st){var s=st.slice();for(var c=0;c<4;c++){var i=c*4,a0=st[i],a1=st[i+1],a2=st[i+2],a3=st[i+3];s[i]=gmul(a0,2)^gmul(a1,3)^a2^a3;s[i+1]=a0^gmul(a1,2)^gmul(a2,3)^a3;s[i+2]=a0^a1^gmul(a2,2)^gmul(a3,3);s[i+3]=gmul(a0,3)^a1^a2^gmul(a3,2);}return s;}
+function aIMC(st){var s=st.slice();for(var c=0;c<4;c++){var i=c*4,a0=st[i],a1=st[i+1],a2=st[i+2],a3=st[i+3];s[i]=gmul(a0,14)^gmul(a1,11)^gmul(a2,13)^gmul(a3,9);s[i+1]=gmul(a0,9)^gmul(a1,14)^gmul(a2,11)^gmul(a3,13);s[i+2]=gmul(a0,13)^gmul(a1,9)^gmul(a2,14)^gmul(a3,11);s[i+3]=gmul(a0,11)^gmul(a1,13)^gmul(a2,9)^gmul(a3,14);}return s;}
+function aARK(st,rk){return st.map(function(b,i){return b^rk[i];});}
+function aKE(key){
+  var Nk=key.length/4,Nr=Nk+6,tw=4*(Nr+1),w=[],i;
+  for(i=0;i<Nk;i++)w.push([key[i*4],key[i*4+1],key[i*4+2],key[i*4+3]]);
+  for(i=Nk;i<tw;i++){
+    var tmp=w[i-1].slice();
+    if(i%Nk===0)tmp=[SA[tmp[1]]^RCON[i/Nk-1],SA[tmp[2]],SA[tmp[3]],SA[tmp[0]]];
+    else if(Nk>6&&i%Nk===4)tmp=tmp.map(function(b){return SA[b];});
+    w.push(w[i-Nk].map(function(b,j){return b^tmp[j];}));
+  }
+  var rks=[];
+  for(var r=0;r<=Nr;r++){var rk=[];for(var cc=0;cc<4;cc++){var ww=w[r*4+cc];rk.push(ww[0],ww[1],ww[2],ww[3]);}rks.push(rk);}
+  return{rks:rks,Nr:Nr};
+}
+function mkMat(st){var h='<div class="amat">';for(var row=0;row<4;row++)for(var col=0;col<4;col++)h+='<div class="amc">'+st[col*4+row].toString(16).padStart(2,'0').toUpperCase()+'</div>';return h+'</div>';}
+
+/* ===== AES PROCESS ===== */
+function aesProc(inB,kB,dec){
+  var steps=[],ke=aKE(kB),rks=ke.rks,Nr=ke.Nr,st=inB.slice();
+  var inL=dec?'Ciphertext':'Plaintext';
+
+  steps.push({n:'State Matrix \u2014 Input',tag:'init',r:null,
+    desc:'The 16-byte '+inL+' is arranged into a 4\u00D74 state matrix, column by column.',
+    d1:{l:inL+' (Hex)',v:hexSp(stHex(st))},mat:st.slice(),viz:''});
+
+  if(dec){
+    var prev=st.slice();st=aARK(st,rks[Nr]);
+    steps.push({n:'AddRoundKey (Key '+Nr+')',tag:'xor',r:Nr,
+      desc:'Decryption starts with XOR against the last round key (Key '+Nr+'). The table shows each byte of the state XORed with the corresponding key byte.',
+      d1:{l:'State after AddRoundKey (Hex)',v:hexSp(stHex(st))},
+      mat:st.slice(),viz:buildAesXorViz(prev,rks[Nr],st)});
+
+    for(var r=Nr-1;r>=0;r--){
+      var rn=Nr-r;
+      var bISR=st.slice();var isr=aISR(st);
+      steps.push({n:'Round '+rn+' \u2014 InvShiftRows',tag:'shift',r:rn,
+        desc:'Each row shifts RIGHT: Row 0 unchanged, Row 1 right by 1, Row 2 by 2, Row 3 by 3. Reverses ShiftRows from encryption.',
+        d1:{l:'State after InvShiftRows (Hex)',v:hexSp(stHex(isr))},
+        mat:isr.slice(),viz:buildShiftRowsViz(bISR,isr,true)});
+      st=isr;
+
+      var bISB=st.slice();var isb=aISub(st);
+      steps.push({n:'Round '+rn+' \u2014 InvSubBytes',tag:'sub',r:rn,
+        desc:'Each byte replaced using the inverse AES S-box. The grid below shows every byte: violet = input, pink = output after inverse S-box.',
+        d1:{l:'State after InvSubBytes (Hex)',v:hexSp(stHex(isb))},
+        mat:isb.slice(),viz:buildAesSboxViz(bISB,isb)});
+      st=isb;
+
+      var bARK=st.slice();var ark=aARK(st,rks[r]);
+      steps.push({n:'Round '+rn+' \u2014 AddRoundKey (Key '+r+')',tag:'xor',r:rn,
+        desc:'XOR with Round Key '+r+'. Self-inverse operation. The table shows the byte-by-byte XOR.',
+        d1:{l:'State after AddRoundKey (Hex)',v:hexSp(stHex(ark))},
+        mat:ark.slice(),viz:buildAesXorViz(bARK,rks[r],ark)});
+      st=ark;
+
+      if(r>0){
+        var bIMC=st.slice();var imc=aIMC(st);
+        steps.push({n:'Round '+rn+' \u2014 InvMixColumns',tag:'mix',r:rn,
+          desc:'Each column is multiplied by the inverse GF(2\u2078) matrix with multipliers {9,11,13,14}. The column-by-column transformation is shown below.',
+          d1:{l:'State after InvMixColumns (Hex)',v:hexSp(stHex(imc))},
+          mat:imc.slice(),viz:buildMixColViz(bIMC,imc)});
+        st=imc;
+      }
+    }
+  } else {
+    var prev0=st.slice();st=aARK(st,rks[0]);
+    steps.push({n:'AddRoundKey \u2014 Key Whitening',tag:'xor',r:0,
+      desc:'XOR every byte with Round Key 0. This whitening step prevents analysis before the first SubBytes. The table shows each byte of state XOR key byte.',
+      d1:{l:'State after AddRoundKey (Hex)',v:hexSp(stHex(st))},
+      mat:st.slice(),viz:buildAesXorViz(prev0,rks[0],st)});
+
+    for(var r=1;r<=Nr;r++){
+      var bSub=st.slice();var as=aSub(st);
+      steps.push({n:'Round '+r+' \u2014 SubBytes',tag:'sub',r:r,
+        desc:'Every byte is replaced by the AES S-box. The grid shows each input byte (violet) and its S-box output (pink).',
+        d1:{l:'State after SubBytes (Hex)',v:hexSp(stHex(as))},
+        mat:as.slice(),viz:buildAesSboxViz(bSub,as)});
+      st=as;
+
+      var bSR=st.slice();var ss=aSR(st);
+      steps.push({n:'Round '+r+' \u2014 ShiftRows',tag:'shift',r:r,
+        desc:'Rows shift left: Row 0 unchanged, Row 1 left 1, Row 2 left 2, Row 3 left 3. The diagram shows before and after for each row.',
+        d1:{l:'State after ShiftRows (Hex)',v:hexSp(stHex(ss))},
+        mat:ss.slice(),viz:buildShiftRowsViz(bSR,ss,false)});
+      st=ss;
+
+      if(r<Nr){
+        var bMC=st.slice();var ms=aMC(st);
+        steps.push({n:'Round '+r+' \u2014 MixColumns',tag:'mix',r:r,
+          desc:'Each column of 4 bytes is multiplied by the fixed GF(2\u2078) matrix. The table shows input and output for each column.',
+          d1:{l:'State after MixColumns (Hex)',v:hexSp(stHex(ms))},
+          mat:ms.slice(),viz:buildMixColViz(bMC,ms)});
+        st=ms;
+      }
+
+      var bAK=st.slice();var ak=aARK(st,rks[r]);
+      steps.push({n:'Round '+r+' \u2014 AddRoundKey (Key '+r+')',tag:'xor',r:r,
+        desc:'XOR with Round Key '+r+'. The table shows state byte \u2295 key byte = output byte for all 16 positions.',
+        d1:{l:'State after AddRoundKey (Hex)',v:hexSp(stHex(ak))},
+        mat:ak.slice(),viz:buildAesXorViz(bAK,rks[r],ak)});
+      st=ak;
+    }
+  }
+
+  steps.push({n:'Output \u2014 '+(dec?'Decrypted Plaintext':'Ciphertext'),tag:'init',r:null,
+    desc:'Final state read column-by-column gives the '+(dec?'recovered plaintext':'ciphertext')+'.',
+    d1:{l:'Output (Hex)',v:hexSp(stHex(st))},
+    mat:st.slice(),viz:''});
+  return{steps:steps,out:st};
+}
+
+/* ===== AES UI ===== */
+var aMode='enc',aSteps=[],aCur=0,aTimer=null;
+function setAM(m){
+  aMode=m;
+  var bs=g('am-sw').querySelectorAll('.msw');
+  bs[0].className='msw'+(m==='enc'?' enc-on':'');
+  bs[1].className='msw'+(m==='dec'?' dec-on':'');
+  g('a-il').textContent=m==='enc'?'Plaintext \u2014 16 ASCII chars':'Ciphertext (Hex) \u2014 32 hex chars';
+  g('a-in').value=m==='enc'?'HelloWorldCrypto':'';
+  g('a-in').maxLength=m==='enc'?16:32;
+  g('a-mi').textContent=m==='enc'?'ENCRYPT':'DECRYPT';
+  g('a-mi').className='mi-tag '+(m==='enc'?'mi-e':'mi-d');
+}
+function updAK(){
+  var sz=parseInt(g('a-ks').value),ln={128:16,192:24,256:32}[sz];
+  g('a-kl').textContent='Key \u2014 '+ln+' ASCII chars';
+  var ki=g('a-key');ki.maxLength=ln;ki.value=ki.value.padEnd(ln,' ').substr(0,ln);
+}
+function runAES(){
+  var sz=parseInt(g('a-ks').value),kl={128:16,192:24,256:32}[sz];
+  var k=g('a-key').value.padEnd(kl,' ').substr(0,kl);
+  var kB=Array.from(k).map(function(c){return c.charCodeAt(0);});
+  var inB;
+  if(aMode==='enc'){
+    var pt=g('a-in').value.padEnd(16,' ').substr(0,16);
+    inB=Array.from(pt).map(function(c){return c.charCodeAt(0);});
+    g('a-ih').textContent=hexSp(toHex(pt));
+  } else {
+    var hx=g('a-in').value.replace(/\s/g,'').toUpperCase();
+    if(hx.length<32){alert('Enter 32 hex chars for AES decryption.');return;}
+    hx=hx.substr(0,32);inB=hexToBytes(hx);
+    g('a-ih').textContent=hexSp(hx);
+  }
+  var res=aesProc(inB,kB,aMode==='dec');
+  aSteps=res.steps;aCur=0;
+  var oh=stHex(res.out);
+  g('a-oh').textContent=hexSp(oh);
+  if(aMode==='dec'){
+    var txt=res.out.map(function(b){return b>=32&&b<127?String.fromCharCode(b):'?';}).join('');
+    g('a-mat').innerHTML='<div style="font-family:DM Mono,monospace;font-size:0.78rem;color:#50e8a8;padding:4px 0">ASCII: '+txt+'</div>';
+  } else {
+    g('a-mat').innerHTML=mkMat(res.out);
+  }
+  g('ac-ctrl').style.display='flex';g('a-prog').style.display='block';
+  renderA();
+}
+function renderA(){
+  var c=g('a-steps');c.innerHTML='';
+  aSteps.forEach(function(s,i){
+    var isA=i===aCur,isV=i<aCur;
+    var tc={perm:'t-perm',sub:'t-sub',xor:'t-xor',mix:'t-mix',key:'t-key',init:'t-init',shift:'t-shift'}[s.tag]||'t-init';
+    var rp=(s.r&&s.r>0)?'<span class="rp rp-a">R'+s.r+'</span>':'';
+    var div=document.createElement('div');
+    div.className='sc as '+(isA?'act ':'')+(isV?'vis ':'');
+    div.id='ac'+i;
+    var inner='<div class="sc-h"><span class="sn">'+String(i+1).padStart(2,'0')+'</span><span class="sname">'+rp+s.n+'</span><span class="tag '+tc+'">'+s.tag+'</span></div>';
+    if(isA||isV){
+      inner+='<div class="sc-b"><p class="sdesc">'+s.desc+'</p>';
+      inner+='<div class="db"><div class="dl">'+s.d1.l+'</div><div class="dv'+(isA?' fl':'')+'">'+s.d1.v+'</div></div>';
+      if(isA&&s.mat)inner+=mkMat(s.mat);
+      if(isA&&s.viz)inner+=s.viz;
+      inner+='</div>';
+    }
+    div.innerHTML=inner;
+    c.appendChild(div);
+  });
+  var pct=((aCur+1)/aSteps.length*100).toFixed(1);
+  g('a-pf').style.width=pct+'%';
+  g('a-ctr').textContent=(aCur+1)+' / '+aSteps.length;
+  g('a-prev').disabled=aCur===0;
+  g('a-next').disabled=aCur===aSteps.length-1;
+  setTimeout(function(){var el=g('ac'+aCur);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},60);
+}
+function aNav(d){aCur=Math.max(0,Math.min(aSteps.length-1,aCur+d));renderA();}
+function aAuto(){
+  var b=g('a-auto');
+  if(aTimer){clearInterval(aTimer);aTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');}
+  else{b.textContent='\u23F8 STOP';b.classList.add('play');
+    aTimer=setInterval(function(){
+      if(aCur>=aSteps.length-1){clearInterval(aTimer);aTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');return;}
+      aCur++;renderA();},1200);}
+}
+function resetAES(){
+  if(aTimer){clearInterval(aTimer);aTimer=null;}
+  aSteps=[];aCur=0;
+  ['a-ih','a-oh'].forEach(function(id){g(id).textContent='\u2014';});
+  g('a-mat').textContent='\u2014';
+  g('ac-ctrl').style.display='none';g('a-prog').style.display='none';
+  g('a-steps').innerHTML='<div class="ph"><span class="ph-ico">&#x2699;</span><div class="ph-t">Ready</div><div class="ph-s">// Enter values and click Simulate</div></div>';
+}
+function switchTab(t){
+  document.querySelectorAll('.tcontent').forEach(function(x){x.classList.remove('on');});
+  document.querySelectorAll('.tpill').forEach(function(x){x.classList.remove('on');});
+  g(t+'-tab').classList.add('on');
+  document.querySelector('.tpill.'+t).classList.add('on');
+}
+
+/* ===== THEME TOGGLE ===== */
+var isLight=false;
+function toggleTheme(){
+  isLight=!isLight;
+  document.body.classList.toggle('light',isLight);
+  var btn=g('theme-btn');
+  btn.textContent=isLight?'\uD83C\uDF19 Dark Mode':'\u2600 Light Mode';
+}
+
+/* ===== FLOATING PAUSE BUTTON HANDLER ===== */
+function floatPauseClick(){
+  if(pausedSim) return; // already paused
+  if(dTimer) dPause();
+  else if(aTimer) aPause();
+}
+
+/* ===== PAUSE / RESUME ===== */
+var pausedSim=null; // 'des' or 'aes'
+function dPause(){
+  if(!dTimer) return;
+  clearInterval(dTimer); dTimer=null;
+  pausedSim='des';
+  g('pause-step-info').textContent='Step '+( dCur+1)+' / '+dSteps.length+' \u2014 '+dSteps[dCur].n;
+  g('pause-overlay').classList.add('show');
+}
+function aPause(){
+  if(!aTimer) return;
+  clearInterval(aTimer); aTimer=null;
+  pausedSim='aes';
+  g('pause-step-info').textContent='Step '+(aCur+1)+' / '+aSteps.length+' \u2014 '+aSteps[aCur].n;
+  g('pause-overlay').classList.add('show');
+}
+function resumeSim(){
+  g('pause-overlay').classList.remove('show');
+  g('float-pause').classList.add('show');
+  if(pausedSim==='des') continueDesAuto();
+  else continueAesAuto();
+  pausedSim=null;
+}
+function skipToEnd(){
+  g('pause-overlay').classList.remove('show');
+  g('float-pause').classList.remove('show');
+  if(pausedSim==='des'){ dCur=dSteps.length-1; renderD(); resetDesAutoBtn(); }
+  else { aCur=aSteps.length-1; renderA(); resetAesAutoBtn(); }
+  pausedSim=null;
+}
+function stopSim(){
+  g('pause-overlay').classList.remove('show');
+  g('float-pause').classList.remove('show');
+  if(pausedSim==='des') resetDesAutoBtn();
+  else resetAesAutoBtn();
+  pausedSim=null;
+}
+function resetDesAutoBtn(){ var b=g('d-auto');b.textContent='\u25B6 AUTO';b.classList.remove('play');g('d-pause').style.display='none';g('float-pause').classList.remove('show'); }
+function resetAesAutoBtn(){ var b=g('a-auto');b.textContent='\u25B6 AUTO';b.classList.remove('play');g('a-pause').style.display='none';g('float-pause').classList.remove('show'); }
+
+/* ===== AUTO WITH PAUSE SUPPORT ===== */
+function dAuto(){
+  var b=g('d-auto'),pb=g('d-pause');
+  if(dTimer){ clearInterval(dTimer);dTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');pb.style.display='none';g('float-pause').classList.remove('show'); }
+  else{ b.textContent='\u23F8 Running...';b.classList.add('play');pb.style.display='inline-block';g('float-pause').classList.add('show');
+    continueDesAuto(); }
+}
+function continueDesAuto(){
+  var spd=parseInt(g('d-speed').value)||1200;
+  dTimer=setInterval(function(){
+    if(dCur>=dSteps.length-1){clearInterval(dTimer);dTimer=null;resetDesAutoBtn();return;}
+    dCur++;renderD();},spd);
+}
+function aAuto(){
+  var b=g('a-auto'),pb=g('a-pause');
+  if(aTimer){ clearInterval(aTimer);aTimer=null;b.textContent='\u25B6 AUTO';b.classList.remove('play');pb.style.display='none';g('float-pause').classList.remove('show'); }
+  else{ b.textContent='\u23F8 Running...';b.classList.add('play');pb.style.display='inline-block';g('float-pause').classList.add('show');
+    continueAesAuto(); }
+}
+function continueAesAuto(){
+  var spd=parseInt(g('a-speed').value)||1200;
+  aTimer=setInterval(function(){
+    if(aCur>=aSteps.length-1){clearInterval(aTimer);aTimer=null;resetAesAutoBtn();return;}
+    aCur++;renderA();},spd);
+}
+
+/* ===== JUMP TO STEP ===== */
+function dJump(){
+  var v=parseInt(g('d-jump').value);
+  if(!v||v<1||v>dSteps.length){alert('Enter a step number between 1 and '+dSteps.length);return;}
+  dCur=v-1; renderD(); g('d-jump').value='';
+}
+function aJump(){
+  var v=parseInt(g('a-jump').value);
+  if(!v||v<1||v>aSteps.length){alert('Enter a step number between 1 and '+aSteps.length);return;}
+  aCur=v-1; renderA(); g('a-jump').value='';
+}
+
+/* ===== COPY OUTPUT ===== */
+function copyOut(id, btn){
+  var txt=g(id).textContent;
+  if(!txt||txt==='\u2014') return;
+  navigator.clipboard.writeText(txt).then(function(){
+    btn.textContent='\u2713 Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\u2398 Copy';btn.classList.remove('copied');},1800);
+  }).catch(function(){
+    var t=document.createElement('textarea');t.value=txt;document.body.appendChild(t);t.select();document.execCommand('copy');document.body.removeChild(t);
+    btn.textContent='\u2713 Copied!';btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='\u2398 Copy';btn.classList.remove('copied');},1800);
+  });
+}
+
+/* ===== GUIDE MODAL ===== */
+function openGuide(){ g('guide-modal').classList.add('show'); document.body.style.overflow='hidden'; }
+function closeGuide(){ g('guide-modal').classList.remove('show'); document.body.style.overflow=''; }
+g('guide-modal').addEventListener('click',function(e){ if(e.target===this) closeGuide(); });
+document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ closeGuide(); g('pause-overlay').classList.remove('show'); } });
+</script>
+
+<!-- FLOATING PAUSE BUTTON - always visible while auto is running -->
+<button id="float-pause" onclick="floatPauseClick()">&#x23F8; Pause</button>
+
+<!-- PAUSE OVERLAY -->
+<div id="pause-overlay">
+  <div class="pause-box">
+    <div class="pause-icon">&#x23F8;</div>
+    <div class="pause-title">Paused</div>
+    <div class="pause-step" id="pause-step-info">Step 0 / 0</div>
+    <div class="pause-btns">
+      <button class="pbtn pbtn-res" onclick="resumeSim()">&#x25B6; Resume</button>
+      <button class="pbtn pbtn-skip" onclick="skipToEnd()">&#x23ED; Skip to End</button>
+      <button class="pbtn pbtn-stop" onclick="stopSim()">&#x23F9; Stop</button>
+    </div>
+  </div>
+</div>
+
+<!-- GUIDE MODAL -->
+<div id="guide-modal">
+  <div class="guide-box">
+    <button class="guide-close" onclick="closeGuide()">&#x2715; Close</button>
+    <div class="guide-title">CryptAnalytica</div>
+    <div class="guide-sub">// Beginner's Guide &mdash; How to Use</div>
+    <div class="guide-section">
+      <div class="gsec-title">What is this?</div>
+      <div class="gtip">This simulator shows you <b>exactly what happens inside DES and AES encryption</b> — step by step with visual tables. See every bit permutation, every S-box lookup, every XOR as it happens in real time.</div>
+    </div>
+    <div class="gdivider"></div>
+    <div class="guide-section">
+      <div class="gsec-title" style="color:var(--pb)">DES — Step by Step</div>
+      <div class="gstep"><div class="gstep-num des">1</div><div class="gstep-text"><b>Plaintext</b> — Type any <b>8 characters</b>. Example: <code>HELLO123</code>. DES works on 64 bits = 8 ASCII characters exactly.</div></div>
+      <div class="gstep"><div class="gstep-num des">2</div><div class="gstep-text"><b>Key</b> — Type any <b>8 characters</b> as your secret key. Example: <code>SECRETKY</code>. DES uses 56 of these 64 bits (8 parity bits are dropped by PC-1).</div></div>
+      <div class="gstep"><div class="gstep-num des">3</div><div class="gstep-text"><b>Mode</b> — <b>Encrypt</b> converts plaintext → ciphertext. <b>Decrypt</b> reverses it. For decrypt, paste the 16-char hex from a previous encryption as input.</div></div>
+      <div class="gstep"><div class="gstep-num des">4</div><div class="gstep-text"><b>Simulate</b> — Output appears instantly. Use <b>Next/Prev</b> to step through, or <b>AUTO</b> to play. Press <b>⏸ Pause</b> anytime to freeze and study a step.</div></div>
+      <div class="gtip"><b>Test Decrypt:</b> Encrypt <code>HELLO123</code> key <code>SECRETKY</code> → copy Output Hex → switch Decrypt → paste → same key → Simulate → see <code>HELLO123</code> recovered!</div>
+    </div>
+    <div class="gdivider"></div>
+    <div class="guide-section">
+      <div class="gsec-title" style="color:var(--cb)">AES — Step by Step</div>
+      <div class="gstep"><div class="gstep-num aes">1</div><div class="gstep-text"><b>Plaintext</b> — Type exactly <b>16 characters</b>. AES works on 128-bit blocks = 16 bytes. Example: <code>HelloWorldCrypto</code>.</div></div>
+      <div class="gstep"><div class="gstep-num aes">2</div><div class="gstep-text"><b>Key Size</b>: &nbsp;<b>AES-128</b> = 16 chars (fast, common) &nbsp;|&nbsp; <b>AES-192</b> = 24 chars &nbsp;|&nbsp; <b>AES-256</b> = 32 chars (strongest).</div></div>
+      <div class="gstep"><div class="gstep-num aes">3</div><div class="gstep-text"><b>Key</b> — Match the key size. Example AES-128: <code>SecretKey1234567</code> (exactly 16 chars). This is your password.</div></div>
+      <div class="gstep"><div class="gstep-num aes">4</div><div class="gstep-text"><b>Simulate</b> — Steps show every round: SubBytes (S-box grid), ShiftRows (row diagram), MixColumns (column table), AddRoundKey (XOR table).</div></div>
+      <div class="gtip"><b>Test Decrypt:</b> Encrypt something → copy Output Hex (32 chars) → switch Decrypt → paste hex → same key size &amp; key → Simulate → ASCII shows original text!</div>
+    </div>
+    <div class="gdivider"></div>
+    <div class="guide-section">
+      <div class="gsec-title">Playback Controls</div>
+      <div class="gstep"><div class="gstep-num" style="color:var(--g)">&#9654;</div><div class="gstep-text"><b>AUTO</b> — Plays all steps. <b>⏸ Pause</b> appears while playing — click it to freeze any step. Then Resume, Skip to End, or Stop.</div></div>
+      <div class="gstep"><div class="gstep-num" style="color:var(--y)">#</div><div class="gstep-text"><b>Jump</b> — Type a step number and click Go to jump directly to any step instantly.</div></div>
+      <div class="gstep"><div class="gstep-num" style="color:var(--cb)">&#x26A1;</div><div class="gstep-text"><b>Speed</b> — Slow / Normal / Fast / Very Fast for auto-play.</div></div>
+      <div class="gstep"><div class="gstep-num" style="color:var(--gb)">&#x2398;</div><div class="gstep-text"><b>Copy</b> — Click the Copy button next to Output Hex to copy the result for use in decrypt mode.</div></div>
+    </div>
+    <div style="text-align:center;margin-top:18px">
+      <button class="guide-btn" onclick="closeGuide()">&#x1F512; Start Simulating!</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
